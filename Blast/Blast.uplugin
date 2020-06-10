@@ -6,7 +6,7 @@
   "VersionName": "1.0",
   "CreatedBy": "NVIDIA",
   "CreatedByURL": "https://developer.nvidia.com/blast",
-  "EngineVersion": "4.20.0",
+  "EngineVersion": "4.24.0",
   "Description": "Blast",
   "Category": "Visual FX",
   "EnabledByDefault": true,
@@ -26,7 +26,7 @@
       "WhitelistPlatforms": [ "Win64", "Linux" ]
     },
     {
-      "Name": "Blast",
+      "Name": "BlastRuntime",
       "Type": "Runtime",
       "LoadingPhase": "PreDefault",
       "WhitelistPlatforms": [ "Win64", "Linux" ]
