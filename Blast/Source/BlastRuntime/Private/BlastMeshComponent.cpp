@@ -737,9 +737,11 @@ FBoxSphereBounds UBlastMeshComponent::CalcBounds(const FTransform& LocalToWorld)
 		FBoxSphereBounds NewBounds = NewBox;
 
 		bCachedLocalBoundsUpToDate = true;
+		CachedWorldSpaceBounds = NewBounds;
+		CachedWorldToLocalTransform = LocalToWorld.ToInverseMatrixWithScale();
 
 		// yunjie: TMP CachedLocalBounds
-		CachedWorldSpaceBounds = NewBounds.TransformBy(LocalToWorld.Inverse());
+		// CachedWorldSpaceBounds = NewBounds.TransformBy(LocalToWorld.Inverse());
 
 		return NewBounds;
 	}
