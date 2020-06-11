@@ -7,7 +7,7 @@
 
 
 UCLASS(HideCategories=Object)
-class BLAST_API UBlastAssetImportData : public UAssetImportData
+class BLASTRUNTIME_API UBlastAssetImportData : public UAssetImportData
 {
 	GENERATED_BODY()
 public:

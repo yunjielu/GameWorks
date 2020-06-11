@@ -9,7 +9,7 @@
 Blast material. Describes destructible properties or basically how much of a damage is applied.
 */
 USTRUCT()
-struct BLAST_API FBlastMaterial
+struct BLASTRUNTIME_API FBlastMaterial
 {
 	GENERATED_USTRUCT_BODY()
 

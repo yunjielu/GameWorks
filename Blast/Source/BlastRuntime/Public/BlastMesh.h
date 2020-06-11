@@ -21,7 +21,7 @@ struct FRawMesh;
 
 
 USTRUCT()
-struct BLAST_API FBlastStressProperties
+struct BLASTRUNTIME_API FBlastStressProperties
 {
 	GENERATED_USTRUCT_BODY()
 
@@ -160,7 +160,7 @@ struct FBlastDebrisProperties
 };
 
 USTRUCT()
-struct BLAST_API FBlastImpactDamageAdvancedProperties
+struct BLASTRUNTIME_API FBlastImpactDamageAdvancedProperties
 {
 	GENERATED_USTRUCT_BODY() 
 		
@@ -217,7 +217,7 @@ struct BLAST_API FBlastImpactDamageAdvancedProperties
 
 
 USTRUCT()
-struct BLAST_API FBlastImpactDamageProperties
+struct BLASTRUNTIME_API FBlastImpactDamageProperties
 {
 	GENERATED_USTRUCT_BODY()
 
@@ -255,7 +255,7 @@ struct BLAST_API FBlastImpactDamageProperties
 
 
 USTRUCT()
-struct BLAST_API FBlastCookedChunkData
+struct BLASTRUNTIME_API FBlastCookedChunkData
 {
 	GENERATED_BODY();
 
@@ -284,7 +284,7 @@ private:
 	Asset points back to the paired BlastAsset and must match the provided skeletal mesh and physics asset.
 */
 UCLASS()
-class BLAST_API UBlastMesh : public UBlastAsset
+class BLASTRUNTIME_API UBlastMesh : public UBlastAsset
 {
 	GENERATED_BODY()
 public:

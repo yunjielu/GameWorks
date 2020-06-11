@@ -8,7 +8,7 @@
 //This is a empty tag object added on UWorld::PerModuleDataObjects to mark the glue for the world as dirty.
 //This could just be a flag on UWorld like NumLightingUnbuiltObjects, but we can't edit that class
 UCLASS(Transient)
-class BLAST_API UBlastGlueWorldTag : public UObject
+class BLASTRUNTIME_API UBlastGlueWorldTag : public UObject
 {
 	GENERATED_BODY()
 public:
@@ -55,7 +55,7 @@ public:
 	When the bond to the invisible chunk is broken, the actor will become simulated.
 */
 UCLASS(ClassGroup=Blast, Blueprintable)
-class BLAST_API ABlastGlueVolume : public AVolume
+class BLASTRUNTIME_API ABlastGlueVolume : public AVolume
 {
 	GENERATED_BODY()
 public:

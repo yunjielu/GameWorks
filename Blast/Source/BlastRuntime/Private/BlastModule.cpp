@@ -62,7 +62,7 @@ class BlastErrorCallback final : public Nv::Blast::ErrorCallback
 };
 
 static BlastErrorCallback g_blastErrorCallback;
-IMPLEMENT_MODULE(FBlastModule, Blast);
+IMPLEMENT_MODULE(FBlastModule, BlastRuntime);
 
 FBlastModule::FBlastModule()
 {

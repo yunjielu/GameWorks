@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "NvBlastTypes.h"
@@ -120,7 +120,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FBlastMeshComponentOnChunksDamaged
 
 //BlastMeshComponent is used to create an instance of an BlastMesh asset.
 UCLASS(ClassGroup=Blast, editinlinenew, hidecategories=(Object, Mesh), meta=(BlueprintSpawnableComponent))
-class BLAST_API UBlastMeshComponent : public USkinnedMeshComponent
+class BLASTRUNTIME_API UBlastMeshComponent : public USkinnedMeshComponent
 {
 	GENERATED_BODY()
 public:
@@ -610,7 +610,7 @@ public:
 	virtual void RefreshBoneTransforms(FActorComponentTickFunction* TickFunction = NULL) override;
 
 	friend class FBlastMeshComponentInstanceData;
-	virtual class FActorComponentInstanceData* GetComponentInstanceData() const override;
+	virtual TStructOnScope<FActorComponentInstanceData> GetComponentInstanceData() const override;
 
 	//We don't actually store static lighting data, but it's a good hook to know when our glue data is out of date
 	virtual void InvalidateLightingCacheDetailed(bool bInvalidateBuildEnqueuedLighting, bool bTranslationOnly) override;
@@ -756,7 +756,7 @@ protected:
 
 };
 
-class BLAST_API FBlastMeshSceneProxyBase
+class BLASTRUNTIME_API FBlastMeshSceneProxyBase
 {
 public:
 	FBlastMeshSceneProxyBase(const UBlastMeshComponent* Component) : BlastMeshForDebug(Component->GetBlastMesh()) {}
@@ -794,7 +794,7 @@ private:
 * Blast mesh component scene proxy.
 * Added to debug render collision shapes
 */
-class BLAST_API FBlastMeshSceneProxy : public FBlastMeshSceneProxyBase, public FSkeletalMeshSceneProxy
+class BLASTRUNTIME_API FBlastMeshSceneProxy : public FBlastMeshSceneProxyBase, public FSkeletalMeshSceneProxy
 {
 public:
 	FBlastMeshSceneProxy(const UBlastMeshComponent* Component, FSkeletalMeshRenderData* InSkelMeshRenderData);

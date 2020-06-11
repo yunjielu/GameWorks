@@ -20,7 +20,7 @@ DamageProgram returned provided will be used for it.
 They are also used to automatically apply damage OnHit, @see bDamageOnHit below.
 */
 UCLASS(abstract)
-class BLAST_API UBlastBaseDamageComponent : public USceneComponent
+class BLASTRUNTIME_API UBlastBaseDamageComponent : public USceneComponent
 {
 	GENERATED_BODY()
 public:

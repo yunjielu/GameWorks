@@ -31,12 +31,14 @@
 #include "RawMesh.h"
 #include "Engine/Texture2D.h"
 
+#include "MeshDescription/Public/MeshDescription.h"
+#include "MeshDescriptionOperations.h"
 
 #undef WITH_APEX
 #define WITH_APEX 0
 #include "PhysXPublic.h"
-#include "Physics/IPhysXCooking.h"
-#include "Physics/IPhysXCookingModule.h"
+#include "IPhysXCooking.h"
+#include "IPhysXCookingModule.h"
 
 #include <vector>
 
@@ -357,11 +359,16 @@ TSharedPtr<FFractureSession> FBlastFracture::StartFractureSession(UBlastMesh* In
 	}
 
 	FTransform UE4ToBlastTransform;
-	FRawMesh InSourceRawMesh;
+	// FRawMesh InSourceRawMesh;
 	if (InSourceStaticMesh != nullptr)
 	{
 		UE4ToBlastTransform = UBlastMeshFactory::GetTransformUE4ToBlastCoordinateSystem(nullptr);
-		FMeshMergeHelpers::RetrieveMesh(InSourceStaticMesh, 0, InSourceRawMesh);
+		FMeshDescription DestMeshdescription;
+		FRawMesh InSourceRawMesh;
+		TMap<FName, int32> ToMaterialMap;
+		UStaticMesh::RegisterMeshAttributes(DestMeshdescription);
+		FMeshMergeHelpers::RetrieveMesh(InSourceStaticMesh, 0, DestMeshdescription);
+		FMeshDescriptionOperations::ConvertToRawMesh(DestMeshdescription, InSourceRawMesh, ToMaterialMap);
 		BuildSmoothingGroups(InSourceRawMesh); //Retrieve mesh just assign default smoothing group 1 for each face. So we need to generate it.
 
 		Nv::Blast::Mesh* Mesh = CreateAuthoringMeshFromRawMesh(InSourceRawMesh, UE4ToBlastTransform);
@@ -1452,7 +1459,7 @@ bool FBlastFracture::FractureCutout(TSharedPtr<FFractureSession> FractureSession
 	{
 		CutoutConfig.cutoutSet = NvBlastExtAuthoringCreateCutoutSet();
 		
-		TArray <uint8_t> Buf, Mip; 
+		TArray64 <uint8_t> Buf, Mip; 
 		Pattern->Source.GetMipData(Mip, 0);
 		int32 sz = Pattern->Source.GetSizeX() * Pattern->Source.GetSizeY();
 		Buf.Reserve(sz * 3);

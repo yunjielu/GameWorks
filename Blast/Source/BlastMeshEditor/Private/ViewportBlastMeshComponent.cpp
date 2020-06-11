@@ -139,9 +139,9 @@ int32 UViewportBlastMeshComponent::GetChunkWorldHit(const FVector& Start, const 
 			if (IsChunkVisible(ChunkIndex))
 			{
 				int32 BoneIndex = BlastMesh->ChunkIndexToBoneIndex[ChunkIndex];
-				auto BodyInstance = GetActorBodyInstance(ChunkIndex);
+				auto BodyInstance2 = GetActorBodyInstance(ChunkIndex);
 				auto tr = GetBoneTransform(BoneIndex).Inverse() * BlastMesh->GetComponentSpaceInitialBoneTransform(BoneIndex);
-				if (BodyInstance != nullptr && BodyInstance->LineTrace(Hit, tr.TransformPosition(Start), tr.TransformPosition(End), true, false))
+				if (BodyInstance2 != nullptr && BodyInstance2->LineTrace(Hit, tr.TransformPosition(Start), tr.TransformPosition(End), true, false))
 				{
 					float dist = (Hit.Location - tr.TransformPosition(Start)).SizeSquared();
 					if (dist < NearestHitDistance)

@@ -35,6 +35,9 @@
 #include "Rendering/SkeletalMeshModel.h"
 #include "Rendering/MultiSizeIndexContainer.h"
 
+#include "OverlappingCorners.h"
+#include "Factories/FbxSkeletalMeshImportData.h"
+
 #define LOCTEXT_NAMESPACE "BlastMeshEditor"
 
 #define USE_FRACTURE_UPDATE 0
@@ -45,6 +48,8 @@ namespace
 	TArray<FText> WarningMessages;
 	TArray<FName> WarningNames;
 };
+
+using namespace SkeletalMeshImportData;
 
 void BuildSmoothingGroups(FRawMesh& RawMesh)
 {
@@ -477,7 +482,7 @@ Nv::Blast::Mesh* CreateAuthoringMeshFromRawMesh(const FRawMesh& RawMesh, const F
 
 void PrepareLODData(TSharedPtr<FFractureSession> FractureSession,
 	const TArray<FSkeletalMaterial>& ExistingMaterials, TMap<int32, int32>& InteriorMaterialsToSlots,
-	TArray<FVector>& LODPoints, TArray<FMeshWedge>& LODWedges, TArray<FMeshFace>& LODFaces, TArray<FVertInfluence>& LODInfluences, TArray<int32>& LODPointToRawMap,
+	TArray<FVector>& LODPoints, TArray<SkeletalMeshImportData::FMeshWedge>& LODWedges, TArray<SkeletalMeshImportData::FMeshFace>& LODFaces, TArray<SkeletalMeshImportData::FVertInfluence>& LODInfluences, TArray<int32>& LODPointToRawMap,
 	int32 ChunkIndex = INDEX_NONE)
 {
 	USkeletalMesh* SkeletalMesh = FractureSession->BlastMesh->Mesh;

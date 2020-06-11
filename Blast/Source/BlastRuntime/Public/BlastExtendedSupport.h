@@ -30,7 +30,7 @@ struct FBlastExtendedStructureComponent
 };
 
 UCLASS(ClassGroup = Blast)
-class BLAST_API ABlastExtendedSupportStructure : public AInfo
+class BLASTRUNTIME_API ABlastExtendedSupportStructure : public AInfo
 {
 	GENERATED_BODY()
 public:
@@ -80,7 +80,7 @@ public:
 };
 
 UCLASS(ClassGroup = Blast, Within = BlastExtendedSupportStructure, HideCategories=(BlastMesh,SkeletalMesh,Optimization,Mobile,Lighting,LOD))
-class BLAST_API UBlastExtendedSupportMeshComponent : public UBlastMeshComponent
+class BLASTRUNTIME_API UBlastExtendedSupportMeshComponent : public UBlastMeshComponent
 {
 	GENERATED_BODY()
 public:
@@ -134,7 +134,7 @@ protected:
 
 //This class doesn't do much other than make it easier to tell if an asset is a generated support asset or not
 UCLASS(ClassGroup = Blast)
-class BLAST_API UBlastMeshExtendedSupport : public UBlastMesh
+class BLASTRUNTIME_API UBlastMeshExtendedSupport : public UBlastMesh
 {
 	GENERATED_BODY()
 public:

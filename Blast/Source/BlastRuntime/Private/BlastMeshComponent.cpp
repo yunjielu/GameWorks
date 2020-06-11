@@ -78,8 +78,8 @@ UBlastMeshComponent::UBlastMeshComponent(const FObjectInitializer& ObjectInitial
 
 	bWantsInitializeComponent = true;
 
-	BodyInstance.SetUseAsyncScene(false);
-	DynamicChunkBodyInstance.SetUseAsyncScene(true);
+	// BodyInstance.SetUseAsyncScene(false);
+	// DynamicChunkBodyInstance.SetUseAsyncScene(true);
 	static FName CollisionProfileName(TEXT("Destructible"));
 	BodyInstance.SetCollisionProfileName(CollisionProfileName);
 	DynamicChunkBodyInstance.SetCollisionProfileName(CollisionProfileName);
@@ -706,7 +706,7 @@ FBoxSphereBounds UBlastMeshComponent::CalcBounds(const FTransform& LocalToWorld)
 	{
 		if (bCachedLocalBoundsUpToDate)
 		{
-			return CachedLocalBounds.TransformBy(LocalToWorld);
+			return GetCachedLocalBounds().TransformBy(LocalToWorld);
 		}
 
 		//Examine the existing bodies to see what we have
@@ -737,7 +737,9 @@ FBoxSphereBounds UBlastMeshComponent::CalcBounds(const FTransform& LocalToWorld)
 		FBoxSphereBounds NewBounds = NewBox;
 
 		bCachedLocalBoundsUpToDate = true;
-		CachedLocalBounds = NewBounds.TransformBy(LocalToWorld.Inverse());
+
+		// yunjie: TMP CachedLocalBounds
+		CachedWorldSpaceBounds = NewBounds.TransformBy(LocalToWorld.Inverse());
 
 		return NewBounds;
 	}
@@ -1061,17 +1063,9 @@ private:
 
 //Since we contain an instanced subobject of the glue data we need to implement a custom instance data so preserve that when we are re-instanced during BP compilation
 //which happens a lot (on map load for example) since FActorComponentInstanceData::FActorComponentInstanceData skips those
-class FActorComponentInstanceData* UBlastMeshComponent::GetComponentInstanceData() const
+TStructOnScope<FActorComponentInstanceData> UBlastMeshComponent::GetComponentInstanceData() const
 {
-	FBlastMeshComponentInstanceData* InstanceData = new FBlastMeshComponentInstanceData(this);
-
-	if (!InstanceData->ContainsData())
-	{
-		delete InstanceData;
-		return nullptr;
-	}
-
-	return InstanceData;
+	return MakeStructOnScope<FActorComponentInstanceData, FPrimitiveComponentInstanceData>(this);
 }
 
 void UBlastMeshComponent::InvalidateLightingCacheDetailed(bool bInvalidateBuildEnqueuedLighting, bool bTranslationOnly)
@@ -1142,15 +1136,15 @@ void UBlastMeshComponent::FillInitialComponentSpaceTransformsFromMesh()
 
 void UBlastMeshComponent::RebuildChunkVisibility()
 {
-	static_assert(BVS_HiddenByParent == 0 && sizeof(decltype(BoneVisibilityStates)::ElementType) == 1, "Update this code to not zero the memory");
-	FMemory::Memzero(BoneVisibilityStates.GetData(), BoneVisibilityStates.Num());
+	static_assert(BVS_HiddenByParent == 0 && sizeof(std::remove_reference<decltype(BoneVisibilityStates[0])>::type::ElementType) == 1, "Update this code to not zero the memory");
+	FMemory::Memzero(BoneVisibilityStates[0].GetData(), BoneVisibilityStates[0].Num());
 	const auto* ChunkIndexToBoneIndex = BlastMesh->ChunkIndexToBoneIndex.GetData();
 	for (TConstSetBitIterator<> It(ChunkVisibility); It; ++It) //TConstSetBitIterator automatically skips unset bits
 	{
 		int32 BoneIndex = ChunkIndexToBoneIndex[It.GetIndex()];
-		if (BoneVisibilityStates.IsValidIndex(BoneIndex))
+		if (BoneVisibilityStates[0].IsValidIndex(BoneIndex))
 		{
-			BoneVisibilityStates[BoneIndex] = BVS_Visible;
+			BoneVisibilityStates[0][BoneIndex] = BVS_Visible;
 		}
 	}
 
@@ -1193,9 +1187,8 @@ physx::PxScene* UBlastMeshComponent::GetPXScene() const
 	{
 		return nullptr;
 	}
-	EPhysicsSceneType pst = BlastMesh->PhysicsAsset->bUseAsyncScene ? EPhysicsSceneType::PST_Async : EPhysicsSceneType::PST_Sync;
 	auto PScene = GetWorld()->GetPhysicsScene();
-	return PScene ? PScene->GetPhysXScene(pst) : nullptr;
+	return PScene ? PScene->GetPxScene() : nullptr;
 }
 
 bool UBlastMeshComponent::AllocateTransformData()
@@ -2318,7 +2311,8 @@ void UBlastMeshComponent::InitBodyForActor(FActorData& ActorData, uint32 ActorIn
 	else
 		BodyInst->CopyBodyInstancePropertiesFrom(&DynamicChunkBodyInstance);
 
-	BodyInst->SetUseAsyncScene(BlastMesh->PhysicsAsset->bUseAsyncScene);
+	// yunjie TMP
+	// BodyInst->SetUseAsyncScene(BlastMesh->PhysicsAsset->bUseAsyncScene);
 	BodyInst->bSimulatePhysics = !bIsKinematicActor;
 	BodyInst->InstanceBodyIndex = ActorIndex; // let it be actor index
 	BodyInst->InstanceBoneIndex = ActorIndex; // let it be actor index
@@ -2336,13 +2330,14 @@ void UBlastMeshComponent::InitBodyForActor(FActorData& ActorData, uint32 ActorIn
 	const FBlastImpactDamageProperties& UsedImpactProperties = GetUsedImpactDamageProperties();
 	if (UsedImpactProperties.bEnabled && !BodyInst->bSimulatePhysics && UsedImpactProperties.AdvancedSettings.KinematicsMaxContactImpulse >= 0.f)
 	{
-		ExecuteOnPxRigidBodyReadWrite(BodyInst, [&](PxRigidBody* PRigidBody)
-		{
-			PRigidBody->setMaxContactImpulse(UsedImpactProperties.AdvancedSettings.KinematicsMaxContactImpulse);
-#if PX_PHYSICS_VERSION >= (((3<<24) + (4<<16) + (1<<8) + 0)) // available only since 3.4.1
-			PRigidBody->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_CCD_MAX_CONTACT_IMPULSE, true);
-#endif
-		});
+		// yunjie TMP
+//		ExecuteOnPxRigidBodyReadWrite(BodyInst, [&](PxRigidBody* PRigidBody)
+//		{
+//			PRigidBody->setMaxContactImpulse(UsedImpactProperties.AdvancedSettings.KinematicsMaxContactImpulse);
+//#if PX_PHYSICS_VERSION >= (((3<<24) + (4<<16) + (1<<8) + 0)) // available only since 3.4.1
+//			PRigidBody->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_CCD_MAX_CONTACT_IMPULSE, true);
+//#endif
+//		});
 	}
 
 	BodyInst->UpdateMassProperties();
@@ -2509,7 +2504,8 @@ void UBlastMeshComponent::TickStressSolver()
 		BT.SetScale3D(BodyInst->Scale3D);
 		const FTransform invWT = BT.Inverse();
 
-		PxRigidDynamic* rigidDynamic = BodyInst->GetPxRigidDynamic_AssumesLocked();
+		// yunjie CHANGE: BodyInst->GetPxRigidDynamic_AssumesLocked();
+		PxRigidDynamic * rigidDynamic = FPhysicsInterface_PhysX::GetPxRigidDynamic_AssumesLocked(BodyInst->GetPhysicsActorHandle());
 
 		uint32_t nodeCount = NvBlastActorGetGraphNodeCount(actor, Nv::Blast::logLL);
 		if (nodeCount <= 1) // subsupport chunks don't have graph nodes and only 1 node actor doesn't make sense to be drawn

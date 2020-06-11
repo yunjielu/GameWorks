@@ -5,7 +5,7 @@
 #include "BlastBlueprintFunctionLibrary.generated.h"
 
 UCLASS()
-class BLAST_API UBlastBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
+class BLASTRUNTIME_API UBlastBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 

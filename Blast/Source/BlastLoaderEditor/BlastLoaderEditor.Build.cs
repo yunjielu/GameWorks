@@ -24,7 +24,7 @@ namespace UnrealBuildTool.Rules
             {
             };
 
-            Blast.SetupModuleBlastSupport(this, BlastLibs);
+            BlastRuntime.SetupModuleBlastSupport(this, BlastLibs);
         }
     }
 }

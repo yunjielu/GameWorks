@@ -9,14 +9,14 @@ namespace UnrealBuildTool.Rules
         {
             PrivateIncludePaths.AddRange(
                 new string[] {
-                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../Blast/Public/extensions/assetutils/include/")),
-                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../Blast/Public/extensions/authoring/include/")),
-                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../Blast/Public/extensions/authoringCommon/include/")),
-                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../Blast/Public/extensions/serialization/include/")),
-                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../Blast/Public/extensions/shaders/include/")),
-                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../Blast/Public/extensions/stress/include/")),
-                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../Blast/Public/globals/include/")),
-                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../Blast/Public/lowlevel/include/")),
+                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../BlastRuntime/Public/extensions/assetutils/include/")),
+                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../BlastRuntime/Public/extensions/authoring/include/")),
+                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../BlastRuntime/Public/extensions/authoringCommon/include/")),
+                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../BlastRuntime/Public/extensions/serialization/include/")),
+                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../BlastRuntime/Public/extensions/shaders/include/")),
+                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../BlastRuntime/Public/extensions/stress/include/")),
+                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../BlastRuntime/Public/globals/include/")),
+                    Path.GetFullPath(Path.Combine(ModuleDirectory, "../BlastRuntime/Public/lowlevel/include/")),
                 }
             );
 
@@ -29,7 +29,7 @@ namespace UnrealBuildTool.Rules
 
             PrivateDependencyModuleNames.AddRange(
                 new string[] {
-                    "Blast",
+                    "BlastRuntime",
                     "Core",
                     "CoreUObject",
                     "AssetTools",
@@ -38,7 +38,6 @@ namespace UnrealBuildTool.Rules
                     "Renderer",
                     "PropertyEditor",
                     "XmlParser",
-                    "Slate",
                     "ContentBrowser",
                     "Projects",
                     "Slate",
@@ -47,6 +46,7 @@ namespace UnrealBuildTool.Rules
                     "InputCore",
                     "EditorStyle",
                     "LevelEditor",
+					"MeshPaint",
                     "JsonUtilities",
                     "Json",
                     "RHI",
@@ -67,7 +67,7 @@ namespace UnrealBuildTool.Rules
                  "NvBlastExtAuthoring",
             };
 
-            Blast.SetupModuleBlastSupport(this, BlastLibs);
+            BlastRuntime.SetupModuleBlastSupport(this, BlastLibs);
 
             AddEngineThirdPartyPrivateStaticDependencies(Target, "FBX");
 

@@ -186,7 +186,7 @@ private:
 
 */
 UCLASS()
-class BLAST_API UBlastAsset : public UObject
+class BLASTRUNTIME_API UBlastAsset : public UObject
 {
 	GENERATED_UCLASS_BODY()
 public:

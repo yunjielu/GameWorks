@@ -420,7 +420,7 @@ USkeletalMesh* UBlastMeshFactory::ImportSkeletalMesh(UBlastMesh* BlastMesh, FNam
 		int32 InterestingNodeCount = 1;
 		TArray< TArray<FbxNode*>* > SkelMeshArray;
 
-		FbxImporter->FillFbxSkelMeshArrayInScene(RootNodeToImport, SkelMeshArray, false);
+		FbxImporter->FillFbxSkelMeshArrayInScene(RootNodeToImport, SkelMeshArray, false, false);
 
 		//Remove collision nodes to avoid duplicates. This is the only part that actually needs all this copy and pasted code, otherwise we could use the normal FBX factory
 		collisionImporter.RemoveCollisionNodesFromImportList(SkelMeshArray);
@@ -553,7 +553,7 @@ USkeletalMesh* UBlastMeshFactory::ImportSkeletalMesh(UBlastMesh* BlastMesh, FNam
 						uint32 bImportTextures = FBXImportOptions->bImportTextures;
 						FBXImportOptions->bImportTextures = 0;
 
-						FbxImporter->ImportFbxMorphTarget(SkelMeshNodeArray, NewMesh, BlastMesh, ImportedSuccessfulLodIndex, OutData);
+						FbxImporter->ImportFbxMorphTarget(SkelMeshNodeArray, NewMesh, ImportedSuccessfulLodIndex, OutData);
 
 						FBXImportOptions->bImportMaterials = !!bImportMaterials;
 						FBXImportOptions->bImportTextures = !!bImportTextures;
@@ -609,7 +609,8 @@ bool UBlastMeshFactory::RebuildPhysicsAsset(UBlastMesh* BlastMesh, const TMap<FN
 		for (auto& chunk : hulls)
 		{
 			FName boneName = chunk.Key;
-			int32 NewBodyIndex = FPhysicsAssetUtils::CreateNewBody(Asset, boneName);
+			FPhysAssetCreateParams Params;
+			int32 NewBodyIndex = FPhysicsAssetUtils::CreateNewBody(Asset, boneName, Params);
 			UBodySetup* bs = Asset->SkeletalBodySetups[NewBodyIndex];
 			bs->RemoveSimpleCollision();
 

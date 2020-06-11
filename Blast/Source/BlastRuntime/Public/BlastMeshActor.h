@@ -7,7 +7,7 @@
 
 //ABlastMeshActor is used to support GetReferencedContentObjects functionality. Code should not assume that UBlastMeshComponents are in ABlastMeshActors
 UCLASS(Blueprintable, ComponentWrapperClass, ConversionRoot, meta = (ChildCanTick))
-class BLAST_API ABlastMeshActor : public AActor
+class BLASTRUNTIME_API ABlastMeshActor : public AActor
 {
 	GENERATED_BODY()
 public:
