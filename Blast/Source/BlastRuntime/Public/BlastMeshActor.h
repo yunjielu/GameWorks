@@ -27,3 +27,8 @@ protected:
 	UPROPERTY(Category = BlastMeshActor, VisibleAnywhere, BlueprintReadOnly)
 	UBlastMeshComponent*	BlastMeshComponent;
 };
+
+// yunjie: a macro that help to quickly replace the sub class of ABlastMeshActor
+#define REAL_BLAST_MESH_ACTOR			ABlastMeshActor
+#define REAL_BLAST_MESH_COMPONENT		UBlastMeshComponent
+

@@ -12,7 +12,10 @@ UActorFactoryBlastMesh::UActorFactoryBlastMesh(const FObjectInitializer& ObjectI
 	: Super(ObjectInitializer)
 {
 	DisplayName = LOCTEXT("BlastMeshDisplayName", "Blast Mesh");
-	NewActorClass = ABlastMeshActor::StaticClass();
+
+	// yunjie: replace with macro
+	// NewActorClass = ABlastMeshActor::StaticClass();
+	NewActorClass = REAL_BLAST_MESH_ACTOR::StaticClass();
 	bUseSurfaceOrientation = true;
 }
 
@@ -31,7 +34,8 @@ bool UActorFactoryBlastMesh::CanCreateActorFrom(const FAssetData& AssetData, FTe
 
 UObject* UActorFactoryBlastMesh::GetAssetFromActorInstance(AActor* ActorInstance)
 {
-	if (ABlastMeshActor* BlastActorInstance = Cast<ABlastMeshActor>(ActorInstance))
+	// yunjie: replace with macro
+	if (REAL_BLAST_MESH_ACTOR* BlastActorInstance = Cast<REAL_BLAST_MESH_ACTOR>(ActorInstance))
 	{
 		return BlastActorInstance->GetBlastMeshComponent()->GetBlastMesh();
 	}
@@ -43,7 +47,10 @@ void UActorFactoryBlastMesh::PostSpawnActor(UObject* Asset, AActor* NewActor)
 	Super::PostSpawnActor(Asset, NewActor);
 
 	UBlastMesh* BlastMesh = Cast<UBlastMesh>(Asset);
-	UBlastMeshComponent* BlastComponent = Cast<ABlastMeshActor>(NewActor)->GetBlastMeshComponent();
+	// yunjie: replace with macro
+	// UBlastMeshComponent* BlastComponent = Cast<ABlastMeshActor>(NewActor)->GetBlastMeshComponent();
+	REAL_BLAST_MESH_COMPONENT* BlastComponent = Cast<REAL_BLAST_MESH_ACTOR>(NewActor)->GetBlastMeshComponent();
+	
 	// Change properties
 	BlastComponent->SetBlastMesh(BlastMesh);
 }
@@ -55,7 +62,9 @@ void UActorFactoryBlastMesh::PostCreateBlueprint(UObject* Asset, AActor* CDO)
 	if (Asset != NULL && CDO != NULL)
 	{
 		UBlastMesh* BlastMesh = Cast<UBlastMesh>(Asset);
-		UBlastMeshComponent* BlastComponent = Cast<ABlastMeshActor>(CDO)->GetBlastMeshComponent();
+		// yunjie: replace with macro
+		// UBlastMeshComponent* BlastComponent = Cast<ABlastMeshActor>(CDO)->GetBlastMeshComponent();
+		REAL_BLAST_MESH_COMPONENT* BlastComponent = Cast<REAL_BLAST_MESH_ACTOR>(CDO)->GetBlastMeshComponent();
 		// Change properties
 		BlastComponent->SetBlastMesh(BlastMesh);
 	}
