@@ -66,6 +66,9 @@ void UBlastMesh::PostLoad()
 	//Make sure our instanced sub objects have run PostLoad so they are fully initialized before we use them
 	if (Mesh)
 	{
+		// yunjie: a hacky way for unreal 4.24 and 4.25 specifically to force rebuild blast mesh every time
+		Mesh->bForceRebuildOnCache = true;
+
 		Mesh->ConditionalPostLoad();
 	}
 

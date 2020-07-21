@@ -622,6 +622,9 @@ void ProcessImportMeshSkeleton(USkeletalMesh* SkeletalMesh, TSharedPtr<FFracture
 
 void FinallizeMeshCreation(USkeletalMesh* SkeletalMesh, FSkeletalMeshLODModel& LODModel, TIndirectArray<FComponentReregisterContext>& ComponentContexts)
 {
+	// yunjie: a hacky way for unreal 4.24 and 4.25 specifically to force rebuild blast mesh every time
+	SkeletalMesh->bForceRebuildOnCache = true;
+
 	SkeletalMesh->ResetLODInfo();
 	SkeletalMesh->AddLODInfo();
 	TArray<FSkeletalMeshLODInfo>& lodInfo = SkeletalMesh->GetLODInfoArray();
