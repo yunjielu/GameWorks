@@ -29,6 +29,8 @@ protected:
 };
 
 // yunjie: a macro that help to quickly replace the sub class of ABlastMeshActor
-#define REAL_BLAST_MESH_ACTOR			ABlastMeshActor
-#define REAL_BLAST_MESH_COMPONENT		UBlastMeshComponent
+// #define REAL_BLAST_MESH_ACTOR			ABlastMeshActor
+// #define REAL_BLAST_MESH_COMPONENT		UBlastMeshComponent
+#define REAL_BLAST_MESH_ACTOR			ATestBlastMeshActor
+#define REAL_BLAST_MESH_COMPONENT		UTestBlastMeshComponent
 

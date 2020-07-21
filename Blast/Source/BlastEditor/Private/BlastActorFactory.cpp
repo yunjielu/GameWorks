@@ -2,6 +2,8 @@
 #include "BlastMesh.h"
 #include "BlastMeshActor.h"
 #include "BlastMeshComponent.h"
+#include "TestBlastMeshActor.h"
+#include "TestBlastMeshComponent.h"
 
 #define LOCTEXT_NAMESPACE "Blast"
 
@@ -49,7 +51,7 @@ void UActorFactoryBlastMesh::PostSpawnActor(UObject* Asset, AActor* NewActor)
 	UBlastMesh* BlastMesh = Cast<UBlastMesh>(Asset);
 	// yunjie: replace with macro
 	// UBlastMeshComponent* BlastComponent = Cast<ABlastMeshActor>(NewActor)->GetBlastMeshComponent();
-	REAL_BLAST_MESH_COMPONENT* BlastComponent = Cast<REAL_BLAST_MESH_ACTOR>(NewActor)->GetBlastMeshComponent();
+	UBlastMeshComponent* BlastComponent = Cast<REAL_BLAST_MESH_ACTOR>(NewActor)->GetBlastMeshComponent();
 	
 	// Change properties
 	BlastComponent->SetBlastMesh(BlastMesh);
@@ -64,7 +66,7 @@ void UActorFactoryBlastMesh::PostCreateBlueprint(UObject* Asset, AActor* CDO)
 		UBlastMesh* BlastMesh = Cast<UBlastMesh>(Asset);
 		// yunjie: replace with macro
 		// UBlastMeshComponent* BlastComponent = Cast<ABlastMeshActor>(CDO)->GetBlastMeshComponent();
-		REAL_BLAST_MESH_COMPONENT* BlastComponent = Cast<REAL_BLAST_MESH_ACTOR>(CDO)->GetBlastMeshComponent();
+		UBlastMeshComponent* BlastComponent = Cast<REAL_BLAST_MESH_ACTOR>(CDO)->GetBlastMeshComponent();
 		// Change properties
 		BlastComponent->SetBlastMesh(BlastMesh);
 	}

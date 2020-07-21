@@ -1,11 +1,12 @@
 #include "BlastMeshActor.h"
+#include "TestBlastMeshActor.h"
 #include "BlastExtendedSupport.h"
 
 #define LOCTEXT_NAMESPACE "Blast"
 
 ABlastMeshActor::ABlastMeshActor()
 {
-	BlastMeshComponent = CreateDefaultSubobject<UBlastMeshComponent>(GET_MEMBER_NAME_CHECKED(ABlastMeshActor, BlastMeshComponent));
+	BlastMeshComponent = CreateDefaultSubobject<REAL_BLAST_MESH_COMPONENT>(GET_MEMBER_NAME_CHECKED(ABlastMeshActor, BlastMeshComponent));
 }
 
 #if WITH_EDITOR

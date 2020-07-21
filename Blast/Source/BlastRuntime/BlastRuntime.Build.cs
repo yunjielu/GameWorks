@@ -82,6 +82,7 @@ namespace UnrealBuildTool.Rules
                     Path.GetFullPath(Path.Combine(ModuleDirectory, "Public/extensions/stress/include/")),
                     Path.GetFullPath(Path.Combine(ModuleDirectory, "Public/globals/include/")),
                     Path.GetFullPath(Path.Combine(ModuleDirectory, "Public/lowlevel/include/")),
+                    Path.GetFullPath(Path.Combine(ModuleDirectory, "Public/TestBlastMesh/")),
                 }
             );
 
