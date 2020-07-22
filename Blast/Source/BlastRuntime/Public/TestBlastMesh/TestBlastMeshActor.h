@@ -16,5 +16,11 @@ public:
 
 	UFUNCTION(CrossServer, Reliable)
 	void CrossServerApplyDamage(FVector Origin, float MinRadius, float MaxRadius, float Damage = 100.0f, float ImpulseStrength = 0.0f, bool bImpulseVelChange = true);
+
+	void SetAlreadyBlast() { bAlreadyBlast = true; }
+	bool GetAlreadyBlast() const { return bAlreadyBlast; }
+
+protected:
+	bool					bAlreadyBlast = false;
 };
 

@@ -15,6 +15,36 @@ void UTestBlastMeshComponent::BeginPlay()
 }
 
 
+INT UTestBlastMeshComponent::CanBeFracturedCount()
+{
+	INT result = 0;
+
+	for (int32 actorIndex = BlastActorsBeginLive; actorIndex < BlastActorsEndLive; actorIndex++)
+	{
+		if (!BlastActors.IsValidIndex(actorIndex))
+		{
+			continue;
+		}
+
+		FActorData& ActorData = BlastActors[actorIndex];
+
+		NvBlastActor* Actor = ActorData.BlastActor;
+		if (!Actor)
+		{
+			continue;
+		}
+
+		if (!NvBlastActorCanFracture(Actor, NULL))
+		{
+			continue;
+		}
+
+		result++;
+	}
+
+	return result;
+}
+
 void UTestBlastMeshComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
 	if (
@@ -36,11 +66,13 @@ void UTestBlastMeshComponent::OnCompHit(UPrimitiveComponent* HitComponent, AActo
 	
 	if (
 		GetOwner()->HasAuthority()		// offloading worker
-		|| !GetWorld()->GetGameInstance()->IsDedicatedServerInstance()		// client
+		// || !GetWorld()->GetGameInstance()->IsDedicatedServerInstance()		// client
 		)
 	{
+		/**
 		UE_LOG(LogBlast, Warning, TEXT("%s - WorkerId:[%s] WorkerType:[%s] WorkerLabel:[%s] Name:[%s] OtherActorName:[%s] IsServer:[%s] Authority:[%s]"),
 			*FString(__FUNCTION__), *WorkerId, *WorkerType, *WorkerLabel, *GetFName().ToString(), *OtherActor->GetFName().ToString(), *IsServer, *Authority);
+			*/
 
 		Super::OnHit(HitComponent, OtherActor, OtherComp, NormalImpulse, Hit);
 	}

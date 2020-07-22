@@ -41,11 +41,12 @@ public:
 	UTestBlastMeshComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 
+	INT CanBeFracturedCount();
+
 protected:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
 	
 	UFUNCTION()
 	void OnCompHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
 };
 
