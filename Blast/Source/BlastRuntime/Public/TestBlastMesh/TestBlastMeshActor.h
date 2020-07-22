@@ -13,5 +13,8 @@ class BLASTRUNTIME_API ATestBlastMeshActor : public ABlastMeshActor
 	GENERATED_BODY()
 public:
 	ATestBlastMeshActor();
+
+	UFUNCTION(CrossServer, Reliable)
+	void CrossServerApplyDamage(FVector Origin, float MinRadius, float MaxRadius, float Damage = 100.0f, float ImpulseStrength = 0.0f, bool bImpulseVelChange = true);
 };
 
