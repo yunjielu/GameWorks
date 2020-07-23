@@ -15,9 +15,9 @@ void UTestBlastMeshComponent::BeginPlay()
 }
 
 
-INT UTestBlastMeshComponent::CanBeFracturedCount()
+int32 UTestBlastMeshComponent::CanBeFracturedCount()
 {
-	INT result = 0;
+	int32 result = 0;
 
 	for (int32 actorIndex = BlastActorsBeginLive; actorIndex < BlastActorsEndLive; actorIndex++)
 	{

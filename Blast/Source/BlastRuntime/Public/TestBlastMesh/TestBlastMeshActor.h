@@ -18,7 +18,7 @@ public:
 	void CrossServerApplyDamage(FVector Origin, float MinRadius, float MaxRadius, float Damage = 100.0f, float ImpulseStrength = 0.0f, bool bImpulseVelChange = true);
 
 	void IncBlastCount() { BlastCount++; }
-	INT GetBlastCount() const { return BlastCount; }
+	uint32 GetBlastCount() const { return BlastCount; }
 
 	UFUNCTION(CrossServer, Reliable)
 	void CrossServerPrintCurrentBlastInfos();
@@ -26,6 +26,6 @@ public:
 	void PrintCurrentBlastInfos(const FString& Func);
 
 protected:
-	INT						BlastCount = 0;
+	uint32						BlastCount = 0;
 };
 

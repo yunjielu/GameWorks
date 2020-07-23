@@ -43,7 +43,7 @@ void ATestBlastMeshActor::PrintCurrentBlastInfos(const FString& Func)
 
 	UE_LOG(LogBlast, Warning, TEXT("%s - BlastActor Total Count:[%d]"), *FuncName, FoundBlastActors.Num());
 
-	for (INT i = 0; i < FoundBlastActors.Num(); ++i)
+	for (int32 i = 0; i < FoundBlastActors.Num(); ++i)
 	{
 		REAL_BLAST_MESH_ACTOR* BlastActor = Cast<REAL_BLAST_MESH_ACTOR>(FoundBlastActors[i]);
 		if (BlastActor)

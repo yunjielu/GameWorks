@@ -73,8 +73,10 @@ UBlastMeshComponent::UBlastMeshComponent(const FObjectInitializer& ObjectInitial
 
 	bTickInEditor = true;
 
+#if WITH_EDITOR		// yunjie: add macro to avoid the compiling error since UE only declare this variable when with editor
 	// We want to tick the pose since we need to update our bone positions
 	MeshComponentUpdateFlag = EMeshComponentUpdateFlag::AlwaysTickPoseAndRefreshBones;
+#endif
 
 	bWantsInitializeComponent = true;
 
