@@ -1,5 +1,5 @@
-#include "Kismet/GameplayStatics.h"
 #include "TestBlastMeshActor.h"
+#include "Kismet/GameplayStatics.h"
 
 ATestBlastMeshActor::ATestBlastMeshActor()
 {
