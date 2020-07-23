@@ -17,10 +17,15 @@ public:
 	UFUNCTION(CrossServer, Reliable)
 	void CrossServerApplyDamage(FVector Origin, float MinRadius, float MaxRadius, float Damage = 100.0f, float ImpulseStrength = 0.0f, bool bImpulseVelChange = true);
 
-	void SetAlreadyBlast() { bAlreadyBlast = true; }
-	bool GetAlreadyBlast() const { return bAlreadyBlast; }
+	void IncBlastCount() { BlastCount++; }
+	INT GetBlastCount() const { return BlastCount; }
+
+	UFUNCTION(CrossServer, Reliable)
+	void CrossServerPrintCurrentBlastInfos();
+
+	void PrintCurrentBlastInfos(const FString& Func);
 
 protected:
-	bool					bAlreadyBlast = false;
+	INT						BlastCount = 0;
 };
 
