@@ -7,6 +7,13 @@
 #include "TestBlastMeshComponent.h"
 #include "TestBlastMeshActor.generated.h"
 
+#define DEBRIS_LIFETIME_QUICK_MIN			1
+#define DEBRIS_LIFETIME_QUICK_MAX			2
+#define DEBRIS_LIFETIME_NORMAL_MIN			10
+#define DEBRIS_LIFETIME_NORMAL_MAX			20
+#define DEBRIS_LIFETIME_FOREVER_MIN			-1
+#define DEBRIS_LIFETIME_FOREVER_MAX			-1
+
 UCLASS(Blueprintable, ComponentWrapperClass, ConversionRoot, meta = (ChildCanTick))
 class BLASTRUNTIME_API ATestBlastMeshActor : public ABlastMeshActor
 {
@@ -24,6 +31,12 @@ public:
 	void CrossServerPrintCurrentBlastInfos();
 
 	void PrintCurrentBlastInfos(const FString& Func);
+
+	void SetDebrisLifetime(int32 min, int32 max);
+	static void SetAllDebrisLifeTime(UWorld* world, int32 min, int32 max);
+
+	UFUNCTION(CrossServer, Reliable)
+	void CrossServerSetAllDebrisLifetime(int32 min, int32 max);
 
 protected:
 	uint32						BlastCount = 0;
