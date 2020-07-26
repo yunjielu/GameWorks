@@ -118,3 +118,35 @@ void ATestBlastMeshActor::CrossServerSetAllDebrisLifetime_Implementation(int32 m
 
 	SetAllDebrisLifeTime(GetWorld(), min, max);
 }
+
+void ATestBlastMeshActor::CrossServerDestroyAllActors_Implementation()
+{
+	FString WorkerId = GetWorld()->GetGameInstance()->GetSpatialWorkerId();
+	FString WorkerType = GetWorld()->GetGameInstance()->GetSpatialWorkerType().ToString();
+	FString WorkerLabel = GetWorld()->GetGameInstance()->GetSpatialWorkerLabel();
+	FString IsServer = GetWorld()->GetGameInstance()->IsDedicatedServerInstance() ? "YES" : "NO";
+	FString Authority;
+
+	TArray<AActor*> FoundBlastActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), REAL_BLAST_MESH_ACTOR::StaticClass(), FoundBlastActors);
+
+	int32 num = 0;
+
+	if (FoundBlastActors.Num())
+	{
+		for (int32 i = 0; i < FoundBlastActors.Num(); ++i)
+		{
+			REAL_BLAST_MESH_ACTOR* BlastActor = Cast<REAL_BLAST_MESH_ACTOR>(FoundBlastActors[i]);
+			if (BlastActor)
+			{
+				Authority = BlastActor->HasAuthority() ? "YES" : "NO";
+				BlastActor->Destroy();
+				num++;
+			}
+		}
+	}
+
+	UE_LOG(LogBlast, Warning, TEXT("%s - [%d] blast actors destroied. WorkerId:[%s] WorkerType:[%s] WorkerLabel:[%s] IsServer:[%s] Authority:[%s]"),
+		*FString(__FUNCTION__), num, *WorkerId, *WorkerType, *WorkerLabel, *IsServer, *Authority);
+}
+

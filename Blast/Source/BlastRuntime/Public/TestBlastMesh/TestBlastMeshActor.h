@@ -38,6 +38,9 @@ public:
 	UFUNCTION(CrossServer, Reliable)
 	void CrossServerSetAllDebrisLifetime(int32 min, int32 max);
 
+	UFUNCTION(CrossServer, Reliable)
+	void CrossServerDestroyAllActors();
+
 protected:
 	uint32						BlastCount = 0;
 };
