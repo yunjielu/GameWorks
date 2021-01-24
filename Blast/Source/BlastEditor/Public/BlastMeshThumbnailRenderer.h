@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 
-#include "Templates/ScopedPointer.h"
 #include "UnrealEd/Public/ThumbnailHelpers.h"
 #include "ThumbnailRendering/DefaultSizedThumbnailRenderer.h"
 
@@ -36,10 +35,10 @@ class UBlastMeshThumbnailRenderer : public UDefaultSizedThumbnailRenderer
 public:
 	// UThumbnailRenderer interface
 	virtual bool CanVisualizeAsset(UObject* Object) override;
-	virtual void Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Target, FCanvas* Canvas) override;
+	virtual void Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Viewport, FCanvas* Canvas, bool bAdditionalViewFamily) override;
 	// End of UThumbnailRenderer interface
 
 	virtual void BeginDestroy() override;
 private:
-	TScopedPointer<FBlastMeshThumbnailScene> ThumbnailScene;
+	TSharedPtr<FBlastMeshThumbnailScene> ThumbnailScene;
 };

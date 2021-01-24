@@ -29,7 +29,7 @@ void FAssetTypeActions_BlastMesh::GetActions(const TArray<UObject *>& InObjects,
 										Assets.Add(BlastMesh->Mesh);
 									}
 								}
-								FAssetEditorManager::Get().OpenEditorForAssets(Assets);
+								GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAssets(Assets);
 							})));
 
 	MenuBuilder.AddMenuEntry(LOCTEXT("BlastMesh_ViewSkeleton", "Open Skeleton"),
@@ -45,7 +45,7 @@ void FAssetTypeActions_BlastMesh::GetActions(const TArray<UObject *>& InObjects,
 										Assets.Add(BlastMesh->Skeleton);
 									}
 								}
-								FAssetEditorManager::Get().OpenEditorForAssets(Assets);
+								GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAssets(Assets);
 							})));
 
 	MenuBuilder.AddMenuEntry(LOCTEXT("BlastMesh_ViewPhysicsAsset", "Open Physics Asset"),
@@ -61,7 +61,7 @@ void FAssetTypeActions_BlastMesh::GetActions(const TArray<UObject *>& InObjects,
 										Assets.Add(BlastMesh->PhysicsAsset);
 									}
 								}
-								FAssetEditorManager::Get().OpenEditorForAssets(Assets);
+								GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAssets(Assets);
 							})));
 }
 

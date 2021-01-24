@@ -32,7 +32,7 @@ struct FBlastVector
 
 	FBlastVector() {}
 	FBlastVector(EBlastViewportControlMode InDefaultControlMode, const FVector& Vector)
-		: DefaultControlMode(InDefaultControlMode), V(Vector)
+		: V(Vector), DefaultControlMode(InDefaultControlMode)
 	{
 	}
 

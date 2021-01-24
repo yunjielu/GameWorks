@@ -286,7 +286,7 @@ void FBlastMeshEditorViewportClient::Draw( const FSceneView* View,FPrimitiveDraw
 	
 	if (Comp && Comp->GetBlastMesh() != NULL)
 	{
-		FDynamicColoredMaterialRenderProxy* SelectedColorInstance = new FDynamicColoredMaterialRenderProxy(GEngine->GeomMaterial->GetRenderProxy(false), FColor(255, 0, 0, 128));
+		FDynamicColoredMaterialRenderProxy* SelectedColorInstance = new FDynamicColoredMaterialRenderProxy(GEngine->GeomMaterial->GetRenderProxy(), FLinearColor(255, 0, 0, 128));
 		PDI->RegisterDynamicResource(SelectedColorInstance);
 
 		//Draw chunks and its Voronoi sites

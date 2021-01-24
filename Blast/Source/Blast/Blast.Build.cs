@@ -31,8 +31,6 @@ namespace UnrealBuildTool.Rules
             DirectoryReference EngineDirectory = new DirectoryReference(Path.GetFullPath(Rules.Target.RelativeEnginePath));
             string BLASTLibDir = Path.Combine("$(EngineDir)", ModuleRootFolder.MakeRelativeTo(EngineDirectory), "Libraries", Rules.Target.Platform.ToString());
 
-            Rules.PublicLibraryPaths.Add(Path.Combine(ModuleRootFolder.ToString(), "Libraries", Rules.Target.Platform.ToString()));
-
             string DLLSuffix = "";
             string DLLPrefix = "";
             string LibSuffix = "";
@@ -59,7 +57,7 @@ namespace UnrealBuildTool.Rules
 
             foreach (string Lib in BlastLibs)
             {
-                Rules.PublicAdditionalLibraries.Add(String.Format("{0}{1}{2}", Lib, LibConfiguration, LibSuffix));
+                Rules.PublicAdditionalLibraries.Add(Path.Combine(BLASTLibDir, String.Format("{0}{1}{2}", Lib, LibConfiguration, LibSuffix)));
                 var DllName = String.Format("{0}{1}{2}{3}", DLLPrefix, Lib, LibConfiguration, DLLSuffix);
                 Rules.PublicDelayLoadDLLs.Add(DllName);
                 Rules.RuntimeDependencies.Add(Path.Combine(BLASTLibDir, DllName));
@@ -94,7 +92,6 @@ namespace UnrealBuildTool.Rules
                     "RenderCore",
                     "Renderer",
                     "RHI",
-                    "ShaderCore",
                     "BlastLoader"
                 }
             );
@@ -128,9 +125,23 @@ namespace UnrealBuildTool.Rules
                  "NvBlastExtStress",
             };
 
+            PrivateIncludePaths.AddRange(
+                new string[]
+                {
+                    "Blast/Public/extensions/assetutils/include",
+                    "Blast/Public/extensions/authoring/include",
+                    "Blast/Public/extensions/authoringCommon/include",
+                    "Blast/Public/extensions/serialization/include",
+                    "Blast/Public/extensions/shaders/include",
+                    "Blast/Public/extensions/stress/include",
+                    "Blast/Public/globals/include",
+                    "Blast/Public/lowlevel/include"
+                }
+            );
+
             SetupModuleBlastSupport(this, BlastLibs);
 
-            SetupModulePhysXAPEXSupport(Target);
+            SetupModulePhysicsSupport(Target);
         }
     }
 }

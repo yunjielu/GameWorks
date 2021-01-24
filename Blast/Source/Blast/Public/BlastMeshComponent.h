@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "NvBlastTypes.h"
@@ -12,6 +12,7 @@
 #include "BoneContainer.h"
 #include "BlastBaseDamageComponent.h"
 #include "BlastBaseDamageProgram.h"
+#include "ComponentInstanceDataCache.h"
 #include "BlastMeshComponent.generated.h"
 
 struct NvBlastActor;
@@ -482,13 +483,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Blast")
 	FBox GetActorWorldBounds(FName ActorName) const;
 
-	DEPRECATED(4.18, "Use GetActorWorldAngularVelocityInDegrees instead.")
-	UFUNCTION(BlueprintCallable, Category = "Blast")
-	FVector GetActorWorldAngularVelocity(FName ActorName) const
-	{
-		return GetActorWorldAngularVelocityInDegrees(ActorName);
-	}
-
 	UFUNCTION(BlueprintCallable, Category = "Blast")
 	FVector GetActorWorldAngularVelocityInDegrees(FName ActorName) const
 	{
@@ -525,13 +519,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Blast")
 	FBoxSphereBounds GetChunkWorldBounds(int32 ChunkIndex) const;
 
-	DEPRECATED(4.18, "Use GetChunkWorldAngularVelocityInDegrees instead.")
-	UFUNCTION(BlueprintCallable, Category = "Blast")
-	FVector GetChunkWorldAngularVelocity(int32 ChunkIndex) const
-	{
-		return GetChunkWorldAngularVelocityInDegrees(ChunkIndex);
-	}
-
 	UFUNCTION(BlueprintCallable, Category = "Blast")
 	FVector GetChunkWorldAngularVelocityInDegrees(int32 ChunkIndex) const
 	{
@@ -564,11 +551,11 @@ public:
 	void SetDynamicChunkCollisionResponseToAllChannels(ECollisionResponse NewResponse);
 
 #if WITH_EDITOR
-	virtual void PreEditChange(UProperty* PropertyThatWillChange) override;
+	virtual void PreEditChange(FProperty* PropertyThatWillChange) override;
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual void PostEditComponentMove(bool bFinished) override;
 	virtual void CheckForErrors() override;
-	virtual bool CanEditChange(const UProperty* InProperty) const override;
+	virtual bool CanEditChange(const FProperty* InProperty) const override;
 
 	/* Return indices of all support chunks that overlap the specified volume. This should really only be called by Blast glue build, and before the mesh is fractured. */
 	bool GetSupportChunksInVolumes(const TArray<class ABlastGlueVolume*>& Volumes, TArray<uint32>& OverlappingChunks, TArray<FVector>& GlueVectors, TSet<class ABlastGlueVolume*>& OverlappingVolumes, bool bDrawDebug);
@@ -592,7 +579,7 @@ public:
 	virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
 
 	virtual void BeginPlay() override;
-	virtual void CreateRenderState_Concurrent() override;
+	virtual void CreateRenderState_Concurrent(FRegisterComponentContext* Context) override;
 	virtual void DestroyRenderState_Concurrent() override;
 	virtual void SendRenderDynamicData_Concurrent() override;
 
@@ -610,7 +597,7 @@ public:
 	virtual void RefreshBoneTransforms(FActorComponentTickFunction* TickFunction = NULL) override;
 
 	friend class FBlastMeshComponentInstanceData;
-	virtual class FActorComponentInstanceData* GetComponentInstanceData() const override;
+	virtual TStructOnScope<FActorComponentInstanceData> GetComponentInstanceData() const override;
 
 	//We don't actually store static lighting data, but it's a good hook to know when our glue data is out of date
 	virtual void InvalidateLightingCacheDetailed(bool bInvalidateBuildEnqueuedLighting, bool bTranslationOnly) override;
@@ -749,6 +736,7 @@ protected:
 
 	bool						bAddedOrRemovedActorSinceLastRefresh;
 	bool						bChunkVisibilityChanged;
+	bool						bNeedsMotionClear;
 
 	class FBlastMeshSceneProxyBase* BlastProxy;
 

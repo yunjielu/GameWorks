@@ -34,6 +34,7 @@
 #include "Rendering/SkeletalMeshRenderData.h"
 #include "Rendering/SkeletalMeshModel.h"
 #include "Rendering/MultiSizeIndexContainer.h"
+#include "OverlappingCorners.h"
 
 #define LOCTEXT_NAMESPACE "BlastMeshEditor"
 
@@ -477,7 +478,7 @@ Nv::Blast::Mesh* CreateAuthoringMeshFromRawMesh(const FRawMesh& RawMesh, const F
 
 void PrepareLODData(TSharedPtr<FFractureSession> FractureSession,
 	const TArray<FSkeletalMaterial>& ExistingMaterials, TMap<int32, int32>& InteriorMaterialsToSlots,
-	TArray<FVector>& LODPoints, TArray<FMeshWedge>& LODWedges, TArray<FMeshFace>& LODFaces, TArray<FVertInfluence>& LODInfluences, TArray<int32>& LODPointToRawMap,
+	TArray<FVector>& LODPoints, TArray<SkeletalMeshImportData::FMeshWedge>& LODWedges, TArray<SkeletalMeshImportData::FMeshFace>& LODFaces, TArray<SkeletalMeshImportData::FVertInfluence>& LODInfluences, TArray<int32>& LODPointToRawMap,
 	int32 ChunkIndex = INDEX_NONE)
 {
 	USkeletalMesh* SkeletalMesh = FractureSession->BlastMesh->Mesh;
@@ -617,6 +618,9 @@ void ProcessImportMeshSkeleton(USkeletalMesh* SkeletalMesh, TSharedPtr<FFracture
 
 void FinallizeMeshCreation(USkeletalMesh* SkeletalMesh, FSkeletalMeshLODModel& LODModel, TIndirectArray<FComponentReregisterContext>& ComponentContexts)
 {
+	// Fix for DDC issues on Unreal Engine 4.25, force skeletal mesh data to be rebuilt
+	SkeletalMesh->bForceRebuildOnCache = true;
+
 	SkeletalMesh->ResetLODInfo();
 	SkeletalMesh->AddLODInfo();
 	TArray<FSkeletalMeshLODInfo>& lodInfo = SkeletalMesh->GetLODInfoArray();
@@ -635,7 +639,7 @@ void FinallizeMeshCreation(USkeletalMesh* SkeletalMesh, FSkeletalMeshLODModel& L
 		USkinnedMeshComponent* SkinComp = *It;
 		if (SkinComp->SkeletalMesh == SkeletalMesh)
 		{
-			new(ComponentContexts) FComponentReregisterContext(SkinComp);
+			ComponentContexts.Add(new FComponentReregisterContext(SkinComp));
 		}
 	}
 
@@ -675,9 +679,9 @@ void CreateSkeletalMeshFromAuthoring(TSharedPtr<FFractureSession> FractureSessio
 	}
 
 	TArray<FVector> LODPoints;
-	TArray<FMeshWedge> LODWedges;
-	TArray<FMeshFace> LODFaces;
-	TArray<FVertInfluence> LODInfluences;
+	TArray<SkeletalMeshImportData::FMeshWedge> LODWedges;
+	TArray<SkeletalMeshImportData::FMeshFace> LODFaces;
+	TArray<SkeletalMeshImportData::FVertInfluence> LODInfluences;
 	TArray<int32> LODPointToRawMap;
 
 	PrepareLODData(FractureSession, ExistingMaterials, InteriorMaterialsToSlots, LODPoints, LODWedges, LODFaces, LODInfluences, LODPointToRawMap);
@@ -686,7 +690,7 @@ void CreateSkeletalMeshFromAuthoring(TSharedPtr<FFractureSession> FractureSessio
 
 	FSkeletalMeshModel& ImportedResource = *SkeletalMesh->GetImportedModel();
 	ImportedResource.LODModels.Empty();
-	new(ImportedResource.LODModels)FSkeletalMeshLODModel();
+	ImportedResource.LODModels.Add(new FSkeletalMeshLODModel());
 
 	FSkeletalMeshLODModel& LODModel = ImportedResource.LODModels[0];
 	LODModel.NumTexCoords = 1;// FMath::Max<uint32>(1, skelMeshImportData->NumTexCoords);
@@ -729,9 +733,9 @@ void CreateSkeletalMeshFromAuthoring(TSharedPtr<FFractureSession> FractureSessio
 	check(SkeletalMesh);
 
 	TArray<FVector> LODPoints;
-	TArray<FMeshWedge> LODWedges;
-	TArray<FMeshFace> LODFaces;
-	TArray<FVertInfluence> LODInfluences;
+	TArray<SkeletalMeshImportData::FMeshWedge> LODWedges;
+	TArray<SkeletalMeshImportData::FMeshFace> LODFaces;
+	TArray<SkeletalMeshImportData::FVertInfluence> LODInfluences;
 	TArray<int32> LODPointToRawMap;
 
 	TArray<uint32> TangentsIndices;
@@ -763,7 +767,7 @@ void CreateSkeletalMeshFromAuthoring(TSharedPtr<FFractureSession> FractureSessio
 
 	FSkeletalMeshModel& ImportedResource = *SkeletalMesh->GetImportedModel();
 	ImportedResource.LODModels.Empty();
-	new(ImportedResource.LODModels)FSkeletalMeshLODModel();
+	ImportedResource.LODModels.Add(new FSkeletalMeshLODModel());
 
 	FSkeletalMeshLODModel& LODModel = ImportedResource.LODModels[0];
 	LODModel.NumTexCoords = 1;// FMath::Max<uint32>(1, skelMeshImportData->NumTexCoords);
@@ -813,9 +817,9 @@ void LoadFracturedChunk(TSharedPtr<FFractureSession> FractureSession, UMaterialI
 	check(SkeletalMesh);
 
 	TArray<FVector> LODPoints;
-	TArray<FMeshWedge> LODWedges;
-	TArray<FMeshFace> LODFaces;
-	TArray<FVertInfluence> LODInfluences;
+	TArray<SkeletalMeshImportData::FMeshWedge> LODWedges;
+	TArray<SkeletalMeshImportData::FMeshFace> LODFaces;
+	TArray<SkeletalMeshImportData::FVertInfluence> LODInfluences;
 	TArray<int32> LODPointToRawMap;
 
 	TArray<uint32> TangentsIndices;
@@ -865,7 +869,7 @@ void LoadFracturedChunk(TSharedPtr<FFractureSession> FractureSession, UMaterialI
 
 	for (int32 FaceIndex = 0; FaceIndex < LODFaces.Num(); FaceIndex++)
 	{
-		const FMeshFace& Face = LODFaces[FaceIndex];
+		const SkeletalMeshImportData::FMeshFace& Face = LODFaces[FaceIndex];
 		//TMP clamp to single material
 
 		// Find a chunk which matches this triangle.
@@ -888,7 +892,7 @@ void LoadFracturedChunk(TSharedPtr<FFractureSession> FractureSession, UMaterialI
 		for (int32 VI = 0; VI < 3; ++VI)
 		{
 			int32 WedgeIndex = FaceIndex * 3 + VI;
-			const FMeshWedge& Wedge = LODWedges[WedgeIndex];
+			const SkeletalMeshImportData::FMeshWedge& Wedge = LODWedges[WedgeIndex];
 			FSoftSkinBuildVertex Vertex;
 			Vertex.Position = LODPoints[WedgeIndex];
 			Vertex.TangentX = TangentsX[WedgeIndex];

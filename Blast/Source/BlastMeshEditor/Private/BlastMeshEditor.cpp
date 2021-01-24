@@ -67,8 +67,7 @@ FBlastMeshEditor::~FBlastMeshEditor()
 		FractureSettings->FractureSession.Reset();
 	}
 	FReimportManager::Instance()->OnPostReimport().RemoveAll(this);
-
-	GEditor->OnObjectReimported().RemoveAll(this);
+	GEditor->GetEditorSubsystem<UImportSubsystem>()->OnAssetReimport.RemoveAll(this);
 }
 
 void FBlastMeshEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& InTabManager)

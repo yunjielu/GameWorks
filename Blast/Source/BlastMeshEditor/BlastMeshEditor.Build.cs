@@ -36,6 +36,7 @@ namespace UnrealBuildTool.Rules
                 "CoreUObject",
                 "InputCore",
                 "RenderCore",
+                "PhysicsCore",
                 "Slate",
                 "SlateCore",
                 "EditorStyle",
@@ -47,7 +48,9 @@ namespace UnrealBuildTool.Rules
                 "LevelEditor",
                 "MeshMergeUtilities",
                 "RawMesh",
-                "MeshUtilities",
+                "MeshUtilitiesCommon",
+                "StaticMeshDescription",
+                "MeshDescriptionOperations",
                 "RHI",
                 }
             );

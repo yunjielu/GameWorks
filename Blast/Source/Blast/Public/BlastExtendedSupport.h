@@ -107,7 +107,7 @@ public:
 	void InvalidateSupportData();
 #endif
 	virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
-	virtual void CreateRenderState_Concurrent() override;
+	virtual void CreateRenderState_Concurrent(FRegisterComponentContext* Context) override;
 	virtual void SendRenderDynamicData_Concurrent() override;
 
 	virtual bool ShouldUpdateTransform(bool bLODHasChanged) const override;

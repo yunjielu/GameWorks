@@ -1,4 +1,4 @@
-﻿#include "BlastExtendedSupport.h"
+#include "BlastExtendedSupport.h"
 #include "BlastGlueVolume.h"
 
 #include "UObject/ConstructorHelpers.h"
@@ -270,10 +270,10 @@ FPrimitiveSceneProxy* UBlastExtendedSupportMeshComponent::CreateSceneProxy()
 	return Result;
 }
 
-void UBlastExtendedSupportMeshComponent::CreateRenderState_Concurrent()
+void UBlastExtendedSupportMeshComponent::CreateRenderState_Concurrent(FRegisterComponentContext* Context)
 {
 	//Don't need to create the MeshObject
-	UPrimitiveComponent::CreateRenderState_Concurrent();
+	UPrimitiveComponent::CreateRenderState_Concurrent(Context);
 }
 
 void UBlastExtendedSupportMeshComponent::SendRenderDynamicData_Concurrent()
@@ -630,10 +630,10 @@ void UBlastExtendedSupportMeshComponent::InvalidateSupportData()
 #endif
 
 ABlastExtendedSupportStructure::ABlastExtendedSupportStructure()
-	: bEnabled(true), bondGenerationDistance(0.0f)
+	: bondGenerationDistance(0.0f), bEnabled(true)
 {
 	//Want to be able to see the debug view in game so hide the UBillboardComponent
-	bHidden = false;
+	SetHidden(false);
 
 	//WE can't use the UBillboardComponent since it only exists in the editor
 	USceneComponent* SceneRootComponent = CreateDefaultSubobject<USceneComponent>("RootComponent");
@@ -756,9 +756,9 @@ void ABlastExtendedSupportStructure::PostEditChangeProperty(FPropertyChangedEven
 {
 	const FName PropertyName = (PropertyChangedEvent.MemberProperty != nullptr) ? PropertyChangedEvent.MemberProperty->GetFName() : NAME_None;
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(ABlastExtendedSupportStructure, bEnabled) ||
-		PropertyName == GET_MEMBER_NAME_CHECKED(USceneComponent, RelativeLocation) ||
-		PropertyName == GET_MEMBER_NAME_CHECKED(USceneComponent, RelativeRotation) ||
-		PropertyName == GET_MEMBER_NAME_CHECKED(USceneComponent, RelativeScale3D) ||
+		PropertyName == GET_MEMBER_NAME_CHECKED(USceneComponent, GetRelativeLocation()) ||
+		PropertyName == GET_MEMBER_NAME_CHECKED(USceneComponent, GetRelativeRotation()) ||
+		PropertyName == GET_MEMBER_NAME_CHECKED(USceneComponent, GetRelativeScale3D()) ||
 		PropertyName == GET_MEMBER_NAME_CHECKED(ABlastExtendedSupportStructure, StructureActors) ||
 		PropertyName == GET_MEMBER_NAME_CHECKED(ABlastExtendedSupportStructure, bondGenerationDistance))
 	{

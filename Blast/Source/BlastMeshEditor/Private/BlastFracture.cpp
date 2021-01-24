@@ -30,13 +30,14 @@
 #include "../Private/MeshMergeHelpers.h"
 #include "RawMesh.h"
 #include "Engine/Texture2D.h"
+#include "MeshDescriptionOperations.h"
 
 
 #undef WITH_APEX
 #define WITH_APEX 0
 #include "PhysXPublic.h"
-#include "Physics/IPhysXCooking.h"
-#include "Physics/IPhysXCookingModule.h"
+#include "IPhysXCookingModule.h"
+#include "IPhysXCooking.h"
 
 #include <vector>
 
@@ -357,11 +358,21 @@ TSharedPtr<FFractureSession> FBlastFracture::StartFractureSession(UBlastMesh* In
 	}
 
 	FTransform UE4ToBlastTransform;
-	FRawMesh InSourceRawMesh;
+
 	if (InSourceStaticMesh != nullptr)
 	{
 		UE4ToBlastTransform = UBlastMeshFactory::GetTransformUE4ToBlastCoordinateSystem(nullptr);
-		FMeshMergeHelpers::RetrieveMesh(InSourceStaticMesh, 0, InSourceRawMesh);
+
+		// Fill required material map
+		TMap<FName, int32> MaterialMap;
+		for (int32 MaterialIndex = 0; MaterialIndex < InSourceStaticMesh->StaticMaterials.Num(); ++MaterialIndex)
+		{
+			MaterialMap.Add(InSourceStaticMesh->StaticMaterials[MaterialIndex].ImportedMaterialSlotName, MaterialIndex);
+		}
+
+		FRawMesh InSourceRawMesh;
+		FStaticMeshOperations::ConvertToRawMesh(*InSourceStaticMesh->GetMeshDescription(0), InSourceRawMesh, MaterialMap);
+
 		BuildSmoothingGroups(InSourceRawMesh); //Retrieve mesh just assign default smoothing group 1 for each face. So we need to generate it.
 
 		Nv::Blast::Mesh* Mesh = CreateAuthoringMeshFromRawMesh(InSourceRawMesh, UE4ToBlastTransform);
@@ -1204,6 +1215,7 @@ void FBlastFracture::LoadFracturedMesh(FFractureSessionPtr FractureSession, int3
 	// Have to manually call this, since it doesn't get called on create
 	BlastMesh->RebuildIndexToBoneNameMap();
 	BlastMesh->RebuildCookedBodySetupsIfRequired(true);
+
 #if USE_DYNAMIC_INDEX_BUFFER
 	BlastMesh->Mesh->RebuildIndexBufferRanges();
 #endif // USE_DYNAMIC_INDEX_BUFFER
@@ -1452,7 +1464,7 @@ bool FBlastFracture::FractureCutout(TSharedPtr<FFractureSession> FractureSession
 	{
 		CutoutConfig.cutoutSet = NvBlastExtAuthoringCreateCutoutSet();
 		
-		TArray <uint8_t> Buf, Mip; 
+		TArray64 <uint8_t> Buf, Mip; 
 		Pattern->Source.GetMipData(Mip, 0);
 		int32 sz = Pattern->Source.GetSizeX() * Pattern->Source.GetSizeY();
 		Buf.Reserve(sz * 3);

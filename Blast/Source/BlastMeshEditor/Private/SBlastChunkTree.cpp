@@ -537,7 +537,7 @@ TSharedPtr<SWidget> SBlastChunkTree::ConstructContextMenu() const
 	return SNullWidget::NullWidget;
 }
 
-void SBlastChunkTree::Visibility(bool isShow)
+void SBlastChunkTree::Visibility(bool isShow) const
 {
 	for (auto& item : ChunkHierarchy->GetSelectedItems())
 	{
@@ -546,7 +546,7 @@ void SBlastChunkTree::Visibility(bool isShow)
 	BlastMeshEditorPtr.Pin()->RefreshViewport();
 }
 
-void SBlastChunkTree::SetStatic(bool isStatic)
+void SBlastChunkTree::SetStatic(bool isStatic) const
 {
 	auto BME = BlastMeshEditorPtr.Pin();
 	bool isDirty = false;
@@ -565,19 +565,19 @@ void SBlastChunkTree::SetStatic(bool isStatic)
 	}
 }
 
-void SBlastChunkTree::MergeSelectedChunks()
+void SBlastChunkTree::MergeSelectedChunks() const
 {
 	auto BME = BlastMeshEditorPtr.Pin();
 	BME->MergeSelectedChunks();
 }
 
-void SBlastChunkTree::RemoveChunks()
+void SBlastChunkTree::RemoveChunks() const
 {
 	auto BME = BlastMeshEditorPtr.Pin();
 	BME->RemoveSubhierarchy(INDEX_NONE, true);
 }
 
-void SBlastChunkTree::RemoveChildren()
+void SBlastChunkTree::RemoveChildren() const
 {
 	auto BME = BlastMeshEditorPtr.Pin();
 	BME->RemoveSubhierarchy(INDEX_NONE, false);

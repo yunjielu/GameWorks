@@ -62,6 +62,7 @@ UBlastMeshComponent::UBlastMeshComponent(const FObjectInitializer& ObjectInitial
 	DebrisCount(0),
 	bAddedOrRemovedActorSinceLastRefresh(false),
 	bChunkVisibilityChanged(false),
+	bNeedsMotionClear(false),
 	BlastProxy(nullptr)
 {
 	// NOTE: Do we want this component to tick5?
@@ -74,18 +75,16 @@ UBlastMeshComponent::UBlastMeshComponent(const FObjectInitializer& ObjectInitial
 	bTickInEditor = true;
 
 	// We want to tick the pose since we need to update our bone positions
-	MeshComponentUpdateFlag = EMeshComponentUpdateFlag::AlwaysTickPoseAndRefreshBones;
+	VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 
 	bWantsInitializeComponent = true;
 
-	BodyInstance.SetUseAsyncScene(false);
-	DynamicChunkBodyInstance.SetUseAsyncScene(true);
 	static FName CollisionProfileName(TEXT("Destructible"));
 	BodyInstance.SetCollisionProfileName(CollisionProfileName);
 	DynamicChunkBodyInstance.SetCollisionProfileName(CollisionProfileName);
 	DynamicChunkBodyInstance.SetResponseToChannel(ECC_Pawn, ECR_Ignore);
 
-	bIsActive = true;
+	SetActive(true);
 	bMultiBodyOverlap = true;
 
 	// Make sure the PrimitiveComponent BodyInstance shows as simulating physics
@@ -93,7 +92,6 @@ UBlastMeshComponent::UBlastMeshComponent(const FObjectInitializer& ObjectInitial
 	//Turn on by default to enable impact damage, etc.
 	BodyInstance.bNotifyRigidBodyCollision = true;
 	DynamicChunkBodyInstance.bNotifyRigidBodyCollision = true;
-
 #if USE_DYNAMIC_INDEX_BUFFER
 	// Use index buffer method to hide bones
 	BoneHidingMethod = BHM_Dynamic_Index_Buffer;
@@ -132,7 +130,7 @@ void UBlastMeshComponent::SetModifiedAsset(UBlastAsset* newModifiedAsset)
 
 #if WITH_EDITOR
 
-void UBlastMeshComponent::PreEditChange(UProperty* PropertyThatWillChange)
+void UBlastMeshComponent::PreEditChange(FProperty* PropertyThatWillChange)
 {
 	if (PropertyThatWillChange && PropertyThatWillChange->GetFName() == GET_MEMBER_NAME_CHECKED(UBlastMeshComponent, BlastDebugRenderMode))
 	{
@@ -224,12 +222,12 @@ void UBlastMeshComponent::CheckForErrors()
 	}
 }
 
-bool UBlastMeshComponent::CanEditChange(const UProperty* InProperty) const
+bool UBlastMeshComponent::CanEditChange(const FProperty* InProperty) const
 {
 	bool bResult = Super::CanEditChange(InProperty);
 	if (bResult)
 	{
-		const UProperty* OwnerProp = InProperty->GetOwnerProperty();
+		const FProperty* OwnerProp = InProperty->GetOwnerProperty();
 		if (OwningSupportStructure != nullptr && OwnerProp->HasMetaData("CantUseWithExtendedSupport"))
 		{
 			bResult = false;
@@ -701,14 +699,11 @@ FBodyInstance* UBlastMeshComponent::GetBodyInstance(FName BoneName /*= NAME_None
 
 FBoxSphereBounds UBlastMeshComponent::CalcBounds(const FTransform& LocalToWorld) const
 {
+	// TODO: Cache bounds?
+
 	const bool bInExtendedSupport = OwningSupportStructure && OwningSupportStructureIndex != INDEX_NONE;
 	if (BlastFamily.IsValid() || bInExtendedSupport)
 	{
-		if (bCachedLocalBoundsUpToDate)
-		{
-			return CachedLocalBounds.TransformBy(LocalToWorld);
-		}
-
 		//Examine the existing bodies to see what we have
 		FBox NewBox(ForceInit);
 
@@ -736,14 +731,11 @@ FBoxSphereBounds UBlastMeshComponent::CalcBounds(const FTransform& LocalToWorld)
 		
 		FBoxSphereBounds NewBounds = NewBox;
 
-		bCachedLocalBoundsUpToDate = true;
-		CachedLocalBounds = NewBounds.TransformBy(LocalToWorld.Inverse());
-
 		return NewBounds;
 	}
 	else
 	{
-		return Super::CalcBounds(LocalToWorld);
+		return USkinnedMeshComponent::CalcBounds(LocalToWorld);
 	}
 }
 
@@ -1061,17 +1053,9 @@ private:
 
 //Since we contain an instanced subobject of the glue data we need to implement a custom instance data so preserve that when we are re-instanced during BP compilation
 //which happens a lot (on map load for example) since FActorComponentInstanceData::FActorComponentInstanceData skips those
-class FActorComponentInstanceData* UBlastMeshComponent::GetComponentInstanceData() const
+TStructOnScope<FActorComponentInstanceData> UBlastMeshComponent::GetComponentInstanceData() const
 {
-	FBlastMeshComponentInstanceData* InstanceData = new FBlastMeshComponentInstanceData(this);
-
-	if (!InstanceData->ContainsData())
-	{
-		delete InstanceData;
-		return nullptr;
-	}
-
-	return InstanceData;
+	return MakeStructOnScope<FActorComponentInstanceData, FBlastMeshComponentInstanceData>(this);
 }
 
 void UBlastMeshComponent::InvalidateLightingCacheDetailed(bool bInvalidateBuildEnqueuedLighting, bool bTranslationOnly)
@@ -1142,17 +1126,21 @@ void UBlastMeshComponent::FillInitialComponentSpaceTransformsFromMesh()
 
 void UBlastMeshComponent::RebuildChunkVisibility()
 {
-	static_assert(BVS_HiddenByParent == 0 && sizeof(decltype(BoneVisibilityStates)::ElementType) == 1, "Update this code to not zero the memory");
-	FMemory::Memzero(BoneVisibilityStates.GetData(), BoneVisibilityStates.Num());
+	TArray<uint8>& EditableBoneVisibilityStates = GetEditableBoneVisibilityStates();
+	FMemory::Memzero(EditableBoneVisibilityStates.GetData(), EditableBoneVisibilityStates.Num());
 	const auto* ChunkIndexToBoneIndex = BlastMesh->ChunkIndexToBoneIndex.GetData();
 	for (TConstSetBitIterator<> It(ChunkVisibility); It; ++It) //TConstSetBitIterator automatically skips unset bits
 	{
 		int32 BoneIndex = ChunkIndexToBoneIndex[It.GetIndex()];
-		if (BoneVisibilityStates.IsValidIndex(BoneIndex))
+		if (EditableBoneVisibilityStates.IsValidIndex(BoneIndex))
 		{
-			BoneVisibilityStates[BoneIndex] = BVS_Visible;
+			
+			EditableBoneVisibilityStates[BoneIndex] = BVS_Visible;
 		}
 	}
+	
+	bBoneVisibilityDirty = true;
+	bChunkVisibilityChanged = false;
 
 #if USE_DYNAMIC_INDEX_BUFFER
 	if (IndexBufferOverride.IsInitialized())
@@ -1179,10 +1167,6 @@ void UBlastMeshComponent::RebuildChunkVisibility()
 		}
 	}
 #endif
-
-	ClearMotionVector();
-
-	bChunkVisibilityChanged = false;
 }
 
 
@@ -1193,15 +1177,14 @@ physx::PxScene* UBlastMeshComponent::GetPXScene() const
 	{
 		return nullptr;
 	}
-	EPhysicsSceneType pst = BlastMesh->PhysicsAsset->bUseAsyncScene ? EPhysicsSceneType::PST_Async : EPhysicsSceneType::PST_Sync;
 	auto PScene = GetWorld()->GetPhysicsScene();
-	return PScene ? PScene->GetPhysXScene(pst) : nullptr;
+	return PScene ? PScene->GetPxScene() : nullptr;
 }
 
 bool UBlastMeshComponent::AllocateTransformData()
 {
 	// Allocate transforms if not present.
-	if (Super::AllocateTransformData())
+	if (USkinnedMeshComponent::AllocateTransformData())
 	{
 		//Later we only update the dynamic bones so make sure we fill both buffers
 		FillInitialComponentSpaceTransformsFromMesh();
@@ -1284,7 +1267,7 @@ bool UBlastMeshComponent::ShouldUpdateTransform(bool bLODHasChanged) const
 		return true;
 	}
 #endif
-	return Super::ShouldUpdateTransform(bLODHasChanged);
+	return USkinnedMeshComponent::ShouldUpdateTransform(bLODHasChanged);
 }
 
 bool UBlastMeshComponent::ShouldTickPose() const
@@ -1296,7 +1279,7 @@ bool UBlastMeshComponent::ShouldTickPose() const
 		return true;
 	}
 #endif
-	return Super::ShouldTickPose();
+	return USkinnedMeshComponent::ShouldTickPose();
 }
 
 
@@ -1368,9 +1351,9 @@ void UBlastMeshComponent::BeginPlay()
 	OnComponentHit.AddDynamic(this, &UBlastMeshComponent::OnHit);
 }
 
-void UBlastMeshComponent::CreateRenderState_Concurrent()
+void UBlastMeshComponent::CreateRenderState_Concurrent(FRegisterComponentContext* Context)
 {
-	Super::CreateRenderState_Concurrent();
+	Super::CreateRenderState_Concurrent(Context);
 	auto MeshResource = (ShouldRender() && SkeletalMesh) ? SkeletalMesh->GetResourceForRendering() : nullptr;
 	if (MeshResource)
 	{
@@ -1393,8 +1376,10 @@ void UBlastMeshComponent::DestroyRenderState_Concurrent()
 void UBlastMeshComponent::SendRenderDynamicData_Concurrent()
 {
 	//Must be done before calling the base class if using bone visibility since that updates the mesh object
+	const bool bPrevChunkVisibilityChanged = bChunkVisibilityChanged;
 	if (bChunkVisibilityChanged && BlastMesh)
 	{
+		bNeedsMotionClear = true;
 		RebuildChunkVisibility();
 	}
 
@@ -1408,6 +1393,17 @@ void UBlastMeshComponent::SendRenderDynamicData_Concurrent()
 		});
 	}
 #endif
+
+	if (bNeedsMotionClear)
+	{
+		// Clear motion before & after the visibility change
+		ClearMotionVector();
+	}
+
+	if (!bPrevChunkVisibilityChanged)
+	{
+		bNeedsMotionClear = false;
+	}
 
 	Super::SendRenderDynamicData_Concurrent();
 }
@@ -1829,16 +1825,15 @@ void UBlastMeshComponent::ApplyFracture(uint32 actorIndex, const NvBlastFracture
 						const uint32_t chunk0 = Graph.chunkIndices[FractureData.nodeIndex0];
 						const uint32_t chunk1 = Graph.chunkIndices[FractureData.nodeIndex1];
 
-						RecentDamageEventsBuffer.BondEvents.Add(FBondDamageEvent
-						{
-							chunk0 < chunk1 ? int32(chunk0) : int32(chunk1),
-							chunk0 < chunk1 ? int32(chunk1) : int32(chunk0),
-							FractureData.health * MaterialHealth,
-							BondHealths[BondIndex] * MaterialHealth,
-							SolverBond.area,
-							ActorSpaceToWorldSpace.TransformPosition(LocalCentroid),
-							ActorSpaceToWorldSpace.TransformVector(LocalNormal),
-						});
+						FBondDamageEvent BondDmgEvent;
+						BondDmgEvent.ChunkIndex = chunk0 < chunk1 ? int32(chunk0) : int32(chunk1);
+						BondDmgEvent.OtherChunkIndex = chunk0 < chunk1 ? int32(chunk1) : int32(chunk0);
+						BondDmgEvent.Damage = FractureData.health * MaterialHealth;
+						BondDmgEvent.HealthLeft = BondHealths[BondIndex] * MaterialHealth;
+						BondDmgEvent.BondArea = SolverBond.area;
+						BondDmgEvent.WorldCentroid = ActorSpaceToWorldSpace.TransformPosition(LocalCentroid);
+						BondDmgEvent.WorldNormal = ActorSpaceToWorldSpace.TransformVector(LocalNormal);
+						RecentDamageEventsBuffer.BondEvents.Add(BondDmgEvent);
 						break;
 					}
 				}
@@ -1855,12 +1850,11 @@ void UBlastMeshComponent::ApplyFracture(uint32 actorIndex, const NvBlastFracture
 				const NvBlastChunk& SolverChunk = Chunks[FractureData.chunkIndex];
 				const FVector& LocalCentroid = reinterpret_cast<const FVector&>(SolverChunk.centroid);
 
-				RecentDamageEventsBuffer.ChunkEvents.Add(FChunkDamageEvent
-				{
-					(int32)FractureData.chunkIndex,
-					FractureData.health * MaterialHealth,
-					ActorSpaceToWorldSpace.TransformPosition(LocalCentroid)
-				});
+				FChunkDamageEvent ChunkDmgEvent;
+				ChunkDmgEvent.ChunkIndex = (int32)FractureData.chunkIndex;
+				ChunkDmgEvent.Damage = FractureData.health * MaterialHealth;
+				ChunkDmgEvent.WorldCentroid = ActorSpaceToWorldSpace.TransformPosition(LocalCentroid);
+				RecentDamageEventsBuffer.ChunkEvents.Add(ChunkDmgEvent);
 			}
 		}
 	}
@@ -2318,7 +2312,6 @@ void UBlastMeshComponent::InitBodyForActor(FActorData& ActorData, uint32 ActorIn
 	else
 		BodyInst->CopyBodyInstancePropertiesFrom(&DynamicChunkBodyInstance);
 
-	BodyInst->SetUseAsyncScene(BlastMesh->PhysicsAsset->bUseAsyncScene);
 	BodyInst->bSimulatePhysics = !bIsKinematicActor;
 	BodyInst->InstanceBodyIndex = ActorIndex; // let it be actor index
 	BodyInst->InstanceBoneIndex = ActorIndex; // let it be actor index
@@ -2336,13 +2329,19 @@ void UBlastMeshComponent::InitBodyForActor(FActorData& ActorData, uint32 ActorIn
 	const FBlastImpactDamageProperties& UsedImpactProperties = GetUsedImpactDamageProperties();
 	if (UsedImpactProperties.bEnabled && !BodyInst->bSimulatePhysics && UsedImpactProperties.AdvancedSettings.KinematicsMaxContactImpulse >= 0.f)
 	{
-		ExecuteOnPxRigidBodyReadWrite(BodyInst, [&](PxRigidBody* PRigidBody)
+		if (BodyInst->ActorHandle.IsValid() && FPhysicsInterface::IsRigidBody(BodyInst->ActorHandle))
 		{
-			PRigidBody->setMaxContactImpulse(UsedImpactProperties.AdvancedSettings.KinematicsMaxContactImpulse);
+			FPhysicsCommand::ExecuteWrite(BodyInst->ActorHandle, [&](const FPhysicsActorHandle& Actor)
+			{
+					if (PxRigidBody* PRigidBody = FPhysicsInterface::GetPxRigidBody_AssumesLocked(Actor))
+					{
+						PRigidBody->setMaxContactImpulse(UsedImpactProperties.AdvancedSettings.KinematicsMaxContactImpulse);
 #if PX_PHYSICS_VERSION >= (((3<<24) + (4<<16) + (1<<8) + 0)) // available only since 3.4.1
-			PRigidBody->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_CCD_MAX_CONTACT_IMPULSE, true);
+						PRigidBody->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_CCD_MAX_CONTACT_IMPULSE, true);
 #endif
-		});
+					}
+			});
+		}
 	}
 
 	BodyInst->UpdateMassProperties();
@@ -2509,7 +2508,7 @@ void UBlastMeshComponent::TickStressSolver()
 		BT.SetScale3D(BodyInst->Scale3D);
 		const FTransform invWT = BT.Inverse();
 
-		PxRigidDynamic* rigidDynamic = BodyInst->GetPxRigidDynamic_AssumesLocked();
+		PxRigidDynamic* rigidDynamic = FPhysicsInterface_PhysX::GetPxRigidDynamic_AssumesLocked(BodyInst->GetPhysicsActorHandle());
 
 		uint32_t nodeCount = NvBlastActorGetGraphNodeCount(actor, Nv::Blast::logLL);
 		if (nodeCount <= 1) // subsupport chunks don't have graph nodes and only 1 node actor doesn't make sense to be drawn
@@ -2525,7 +2524,6 @@ void UBlastMeshComponent::TickStressSolver()
 		else // should we apply centrifugal force? Add a toggle-parameter setting here?
 		{
 			PxVec3 localCenterMass = rigidDynamic->getCMassLocalPose().p;
-			
 			PxVec3 localAngularVelocity = rigidDynamic->getGlobalPose().rotateInv(rigidDynamic->getAngularVelocity());
 			StressSolver->addAngularVelocity(*actor, (NvcVec3&)localCenterMass, (NvcVec3&)localAngularVelocity);
 		}

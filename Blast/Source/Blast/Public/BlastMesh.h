@@ -14,11 +14,9 @@ class UPhysicsAsset;
 class USkeleton;
 struct FRawMesh;
 
-
 #ifndef USE_DYNAMIC_INDEX_BUFFER
-#define USE_DYNAMIC_INDEX_BUFFER 1
+#define USE_DYNAMIC_INDEX_BUFFER 0
 #endif
-
 
 USTRUCT()
 struct BLAST_API FBlastStressProperties
@@ -133,9 +131,13 @@ struct FBlastDebrisFilter
 	float DebrisLifetimeMax;
 
 	FBlastDebrisFilter()
-		: DebrisDepth(1)
+		: bUseDebrisDepth(false)
+		, DebrisDepth(1)
+		, bUseDebrisMaxSeparation(false)
 		, DebrisMaxSeparation(1000.0f)
+		, bUseDebrisMaxSize(false)
 		, DebrisMaxSize(1.f)
+		, bUseValidBounds(false)
 		, ValidBounds(FVector(-500000.0f), FVector(500000.0f))
 		, DebrisLifetimeMin(0.f)
 		, DebrisLifetimeMax(0.f)

@@ -17,7 +17,7 @@ bool UBlastMeshThumbnailRenderer::CanVisualizeAsset(UObject* Object)
 	return !Object->IsA<UBlastMeshExtendedSupport>();
 }
 
-void UBlastMeshThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Target, FCanvas* Canvas)
+void UBlastMeshThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32 Width, uint32 Height, FRenderTarget* Viewport, FCanvas* Canvas, bool bAdditionalViewFamily)
 {
 	//Just delegate to the skeletal mesh one
 	UBlastMesh* BlastMesh = Cast<UBlastMesh>(Object);
@@ -25,11 +25,11 @@ void UBlastMeshThumbnailRenderer::Draw(UObject* Object, int32 X, int32 Y, uint32
 	{
 		if (!ThumbnailScene.IsValid())
 		{
-			ThumbnailScene = new FBlastMeshThumbnailScene();
+			ThumbnailScene = TSharedPtr<FBlastMeshThumbnailScene>(new FBlastMeshThumbnailScene());
 		}
 
 		ThumbnailScene->SetBlastMesh(BlastMesh);
-		FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(Target, ThumbnailScene->GetScene(), FEngineShowFlags(ESFIM_Game))
+		FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(Viewport, ThumbnailScene->GetScene(), FEngineShowFlags(ESFIM_Game))
 			.SetWorldTimes(FApp::GetCurrentTime() - GStartTime, FApp::GetDeltaTime(), FApp::GetCurrentTime() - GStartTime));
 
 		ViewFamily.EngineShowFlags.DisableAdvancedFeatures();
@@ -67,7 +67,7 @@ FBlastMeshThumbnailScene::FBlastMeshThumbnailScene()
 
 	PreviewComponent = NewObject<UBlastMeshComponent>(PreviewActor);
 	//Make sure we are rendering in that one frame we have a chance to
-	PreviewComponent->MeshComponentUpdateFlag = EMeshComponentUpdateFlag::AlwaysTickPoseAndRefreshBones;
+	PreviewComponent->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	PreviewActor->SetRootComponent(PreviewComponent);
 	PreviewComponent->RegisterComponent();
 }

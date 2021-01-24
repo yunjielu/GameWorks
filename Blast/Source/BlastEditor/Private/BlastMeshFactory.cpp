@@ -45,8 +45,8 @@ UBlastMeshFactory::UBlastMeshFactory()
 UObject* UBlastMeshFactory::FactoryCreateBinary(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, const TCHAR* Type, const uint8*& Buffer, const uint8* BufferEnd, FFeedbackContext* Warn, bool& bOutOperationCanceled)
 {
 	//NOTE: This broadcasts "InName" as opposed to any changed name. No idea what effect this has.
-	FEditorDelegates::OnAssetPreImport.Broadcast(this, InClass, InParent, InName, Type);
-
+	GEditor->GetEditorSubsystem<UImportSubsystem>()->OnAssetPreImport.Broadcast(this, InClass, InParent, InName, Type);
+	
 	// The return value
 	UBlastMesh* BlastMesh = nullptr;
 	TArray<FString> ReimportFilenames;
@@ -101,7 +101,7 @@ UObject* UBlastMeshFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 		
 	if (!LoadedAsset.IsValid())
 	{
-		FEditorDelegates::OnAssetPostImport.Broadcast(this, nullptr);
+		GEditor->GetEditorSubsystem<UImportSubsystem>()->OnAssetPostImport.Broadcast(this, nullptr);
 		FMessageDialog::Open(EAppMsgType::Ok, FText::Format(LOCTEXT("BlastAssetWrongFormatImport", "Failed to import {0}. The file you are trying to import is not low-level NvBlastAsset. Blast SDK files with extension .blast could contain different asset types inside. This plugins imports only low-level Blast Asset. Look into docs of the tool you used to export this file for more details."), FText::FromString(UFactory::CurrentFilename)));
 		return nullptr;
 	}
@@ -180,6 +180,7 @@ UObject* UBlastMeshFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 	// Have to manually call this, since it doesn't get called on create
 	BlastMesh->RebuildIndexToBoneNameMap();
 	BlastMesh->RebuildCookedBodySetupsIfRequired(true);
+
 #if USE_DYNAMIC_INDEX_BUFFER
 	BlastMesh->Mesh->RebuildIndexBufferRanges();
 #endif // USE_DYNAMIC_INDEX_BUFFER
@@ -188,7 +189,7 @@ UObject* UBlastMeshFactory::FactoryCreateBinary(UClass* InClass, UObject* InPare
 	{
 		SetReimportPaths(BlastMesh, ReimportFilenames);
 		//Success! 
-		FEditorDelegates::OnAssetPostImport.Broadcast(this, BlastMesh);
+		GEditor->GetEditorSubsystem<UImportSubsystem>()->OnAssetPostImport.Broadcast(this, BlastMesh);
 		FAssetRegistryModule::AssetCreated(BlastMesh);
 
 		return BlastMesh;
@@ -420,7 +421,7 @@ USkeletalMesh* UBlastMeshFactory::ImportSkeletalMesh(UBlastMesh* BlastMesh, FNam
 		int32 InterestingNodeCount = 1;
 		TArray< TArray<FbxNode*>* > SkelMeshArray;
 
-		FbxImporter->FillFbxSkelMeshArrayInScene(RootNodeToImport, SkelMeshArray, false);
+		FbxImporter->FillFbxSkelMeshArrayInScene(RootNodeToImport, SkelMeshArray, false, false);
 
 		//Remove collision nodes to avoid duplicates. This is the only part that actually needs all this copy and pasted code, otherwise we could use the normal FBX factory
 		collisionImporter.RemoveCollisionNodesFromImportList(SkelMeshArray);
@@ -553,7 +554,7 @@ USkeletalMesh* UBlastMeshFactory::ImportSkeletalMesh(UBlastMesh* BlastMesh, FNam
 						uint32 bImportTextures = FBXImportOptions->bImportTextures;
 						FBXImportOptions->bImportTextures = 0;
 
-						FbxImporter->ImportFbxMorphTarget(SkelMeshNodeArray, NewMesh, BlastMesh, ImportedSuccessfulLodIndex, OutData);
+						FbxImporter->ImportFbxMorphTarget(SkelMeshNodeArray, NewMesh, ImportedSuccessfulLodIndex, OutData);
 
 						FBXImportOptions->bImportMaterials = !!bImportMaterials;
 						FBXImportOptions->bImportTextures = !!bImportTextures;
@@ -609,7 +610,8 @@ bool UBlastMeshFactory::RebuildPhysicsAsset(UBlastMesh* BlastMesh, const TMap<FN
 		for (auto& chunk : hulls)
 		{
 			FName boneName = chunk.Key;
-			int32 NewBodyIndex = FPhysicsAssetUtils::CreateNewBody(Asset, boneName);
+			FPhysAssetCreateParams assetCreateParams = FPhysAssetCreateParams();
+			int32 NewBodyIndex = FPhysicsAssetUtils::CreateNewBody(Asset, boneName, assetCreateParams);
 			UBodySetup* bs = Asset->SkeletalBodySetups[NewBodyIndex];
 			bs->RemoveSimpleCollision();
 

@@ -233,7 +233,7 @@ namespace
 			polygonData = Polygons.GetData();
 		}
 
-		virtual void release()
+		void release()
 		{ //do nothing
 		}
 	};
@@ -540,7 +540,7 @@ public:
 
 		FSkeletalMeshModel* ImportedResource = SkeletalMesh->GetImportedModel();
 		ImportedResource->LODModels.Empty();
-		new(ImportedResource->LODModels)FSkeletalMeshLODModel();
+		ImportedResource->LODModels.Add(new FSkeletalMeshLODModel());
 
 		FSkeletalMeshLODModel& LODModel = ImportedResource->LODModels[0];
 
@@ -843,8 +843,7 @@ public:
 
 	void CloseContainingWindow()
 	{
-		FWidgetPath WidgetPath;
-		TSharedPtr<SWindow> ContainingWindow = FSlateApplication::Get().FindWidgetWindow(AsShared(), WidgetPath);
+		TSharedPtr<SWindow> ContainingWindow = FSlateApplication::Get().FindWidgetWindow(AsShared());
 		if (ContainingWindow.IsValid())
 		{
 			ContainingWindow->RequestDestroyWindow();
@@ -1419,7 +1418,7 @@ bool FBlastEditorModule::BuildExtendedSupport(ABlastExtendedSupportStructure* Ex
 
 	FSkeletalMeshModel* ImportedModel = SkeletalMesh->GetImportedModel();
 	ImportedModel->LODModels.Empty();
-	new(ImportedModel->LODModels)FSkeletalMeshLODModel();
+	ImportedModel->LODModels.Add(new FSkeletalMeshLODModel());
 
 	FSkeletalMeshLODModel& LODModel = ImportedModel->LODModels[0];
 	LODModel.NumTexCoords = 1;

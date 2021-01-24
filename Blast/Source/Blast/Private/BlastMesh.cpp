@@ -342,7 +342,7 @@ void UBlastMesh::GetRenderMesh(int32 LODIndex, TArray<FRawMesh>& RawMeshes)
 					const int32 VertexIndexForWedge = IndexBuffer.Get(SkelMeshSection.BaseIndex + TriIndex * 3 + WedgeIndex);
 					const FSoftSkinVertex& SkinnedVertex = MeshVerts[VertexIndexForWedge];
 
-					uint8 BoneIndex;
+					FBoneIndexType BoneIndex;
 					if (SkinnedVertex.GetRigidWeightBone(BoneIndex))
 					{
 						ChunkIndex = BoneIndexToChunkIndex[SkelMeshSection.BoneMap[BoneIndex]];

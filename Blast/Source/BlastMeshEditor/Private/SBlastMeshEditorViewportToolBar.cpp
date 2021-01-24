@@ -330,7 +330,7 @@ float SBlastMeshEditorViewportToolbar::OnGetFOVValue() const
 	return Viewport.Pin()->GetViewportClient()->ViewFOV;
 }
 
-void SBlastMeshEditorViewportToolbar::OnFOVValueChanged(float NewValue)
+void SBlastMeshEditorViewportToolbar::OnFOVValueChanged(float NewValue) const
 {
 	bool bUpdateStoredFOV = true;
 	FEditorViewportClient* ViewportClient = Viewport.Pin()->GetViewportClient().Get();

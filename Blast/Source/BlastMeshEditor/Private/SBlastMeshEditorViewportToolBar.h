@@ -52,7 +52,7 @@ public:
 	TSharedRef<SWidget> GenerateOptionsMenu() const;
 	TSharedRef<SWidget> GenerateFOVMenu() const;
 	float OnGetFOVValue() const;
-	void OnFOVValueChanged(float NewValue);
+	void OnFOVValueChanged(float NewValue) const;
 
 	FText GetCameraMenuLabel() const;
 	const FSlateBrush* GetCameraMenuLabelIcon() const;

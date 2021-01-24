@@ -25,7 +25,7 @@ ABlastGlueVolume::ABlastGlueVolume(const FObjectInitializer& ObjectInitializer):
 		GlueVectorComponent->SetWorldRotation(GlueVector.Rotation());
 	}
 #endif
-	bCanBeDamaged = false;
+	SetCanBeDamaged(false);
 	GetBrushComponent()->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 }
 
@@ -105,9 +105,9 @@ void ABlastGlueVolume::InvalidateGlueData()
 
 
 static FName NAME_GlueVector = GET_MEMBER_NAME_CHECKED(ABlastGlueVolume, GlueVector);
-static FName NAME_RelativeLocation = GET_MEMBER_NAME_CHECKED(USceneComponent, RelativeLocation);
-static FName NAME_RelativeRotation = GET_MEMBER_NAME_CHECKED(USceneComponent, RelativeRotation);
-static FName NAME_RelativeScale3D = GET_MEMBER_NAME_CHECKED(USceneComponent, RelativeScale3D);
+static FName NAME_RelativeLocation = GET_MEMBER_NAME_CHECKED(USceneComponent, GetRelativeLocation());
+static FName NAME_RelativeRotation = GET_MEMBER_NAME_CHECKED(USceneComponent, GetRelativeRotation());
+static FName NAME_RelativeScale3D = GET_MEMBER_NAME_CHECKED(USceneComponent, GetRelativeScale3D());
 
 void ABlastGlueVolume::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {

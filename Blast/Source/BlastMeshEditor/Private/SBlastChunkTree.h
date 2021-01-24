@@ -44,11 +44,11 @@ private:
 	/**
 	Context menu callbacks
 	*/
-	void Visibility(bool isShow);
-	void SetStatic(bool isStatic);
-	void MergeSelectedChunks();
-	void RemoveChunks();
-	void RemoveChildren();
+	void Visibility(bool isShow) const;
+	void SetStatic(bool isStatic) const;
+	void MergeSelectedChunks() const;
+	void RemoveChunks() const;
+	void RemoveChildren() const;
 private:
 	
 	TSharedPtr<class SBlastDepthFilter>					DepthFilter;

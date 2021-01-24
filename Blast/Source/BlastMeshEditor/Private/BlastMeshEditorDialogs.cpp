@@ -100,8 +100,7 @@ FReply SSelectStaticMeshDialog::CancelClicked()
 
 void SSelectStaticMeshDialog::CloseContainingWindow()
 {
-	FWidgetPath WidgetPath;
-	TSharedPtr<SWindow> ContainingWindow = FSlateApplication::Get().FindWidgetWindow(AsShared(), WidgetPath);
+	TSharedPtr<SWindow> ContainingWindow = FSlateApplication::Get().FindWidgetWindow(AsShared());
 	if (ContainingWindow.IsValid())
 	{
 		ContainingWindow->RequestDestroyWindow();
@@ -194,8 +193,7 @@ FReply SFixChunkHierarchyDialog::OnClicked(bool isFix)
 
 void SFixChunkHierarchyDialog::CloseContainingWindow()
 {
-	FWidgetPath WidgetPath;
-	TSharedPtr<SWindow> ContainingWindow = FSlateApplication::Get().FindWidgetWindow(AsShared(), WidgetPath);
+	TSharedPtr<SWindow> ContainingWindow = FSlateApplication::Get().FindWidgetWindow(AsShared());
 	if (ContainingWindow.IsValid())
 	{
 		ContainingWindow->RequestDestroyWindow();
@@ -410,8 +408,7 @@ FReply SFitUvCoordinatesDialog::OnClicked(bool isFix)
 
 void SFitUvCoordinatesDialog::CloseContainingWindow()
 {
-	FWidgetPath WidgetPath;
-	TSharedPtr<SWindow> ContainingWindow = FSlateApplication::Get().FindWidgetWindow(AsShared(), WidgetPath);
+	TSharedPtr<SWindow> ContainingWindow = FSlateApplication::Get().FindWidgetWindow(AsShared());
 	if (ContainingWindow.IsValid())
 	{
 		ContainingWindow->RequestDestroyWindow();
@@ -509,8 +506,7 @@ FReply SRebuildCollisionMeshDialog::OnClicked(bool InIsRebuild)
 
 void SRebuildCollisionMeshDialog::CloseContainingWindow()
 {
-	FWidgetPath WidgetPath;
-	TSharedPtr<SWindow> ContainingWindow = FSlateApplication::Get().FindWidgetWindow(AsShared(), WidgetPath);
+	TSharedPtr<SWindow> ContainingWindow = FSlateApplication::Get().FindWidgetWindow(AsShared());
 	if (ContainingWindow.IsValid())
 	{
 		ContainingWindow->RequestDestroyWindow();
