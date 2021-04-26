@@ -499,7 +499,7 @@ USkeletalMesh* UBlastMeshFactory::ImportSkeletalMesh(UBlastMesh* BlastMesh, FNam
 					ImportArgs.InParent = BlastMesh;
 					ImportArgs.NodeArray = SkelMeshNodeArray;
 					ImportArgs.TemplateImportData = SkeletalMeshImportData;
-					ImportArgs.bCancelOperation = &bOperationCanceled;
+					// ImportArgs.bCancelOperation = &bOperationCanceled;
 					ImportArgs.OutData = &OutData;
 
 					if (LODIndex == 0 && SkelMeshNodeArray.Num() != 0)

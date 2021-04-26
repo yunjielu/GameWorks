@@ -714,7 +714,7 @@ void CreateSkeletalMeshFromAuthoring(TSharedPtr<FFractureSession> FractureSessio
 	}
 
 	// Create actual rendering data.
-	bool bBuildSuccess = MeshUtilities->BuildSkeletalMesh(LODModel, SkeletalMesh->RefSkeleton, LODInfluences, LODWedges, LODFaces, LODPoints, LODPointToRawMap, BuildOptions, &WarningMessages, &WarningNames);
+	bool bBuildSuccess = MeshUtilities->BuildSkeletalMesh(LODModel, SkeletalMesh->GetPathName(), SkeletalMesh->RefSkeleton, LODInfluences, LODWedges, LODFaces, LODPoints, LODPointToRawMap, BuildOptions, &WarningMessages, &WarningNames);
 
 	if (!bBuildSuccess)
 	{
@@ -796,7 +796,7 @@ void CreateSkeletalMeshFromAuthoring(TSharedPtr<FFractureSession> FractureSessio
 	}
 
 	// Create actual rendering data.
-	bool bBuildSuccess = MeshUtilities->BuildSkeletalMesh(LODModel, SkeletalMesh->RefSkeleton, LODInfluences, LODWedges, LODFaces, LODPoints, LODPointToRawMap, BuildOptions, &WarningMessages, &WarningNames);
+	bool bBuildSuccess = MeshUtilities->BuildSkeletalMesh(LODModel, SkeletalMesh->GetPathName(), SkeletalMesh->RefSkeleton, LODInfluences, LODWedges, LODFaces, LODPoints, LODPointToRawMap, BuildOptions, &WarningMessages, &WarningNames);
 
 	if (!bBuildSuccess)
 	{
